@@ -55,9 +55,11 @@
 
                     <!-- Actions rapides -->
                     <div class="flex space-x-4">
-                        <button class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
-                            Nouvelle tâche
-                        </button>
+                    <a href="{{ route('projects.tasks.create', [$project->id]) }}" 
+                        class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors inline-block text-center">
+                        Nouvelle tâche
+                    </a>
+
                         <button class="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors">
                             Nouveau sprint
                         </button>
@@ -75,7 +77,7 @@
                     <dl class="space-y-4">
                         <div>
                             <dt class="text-sm font-medium text-gray-400">Propriétaire</dt>
-                            <dd class="mt-1 text-sm text-white">{{ $project->owner->name }}</dd>
+                            <dd class="mt-1 text-sm text-white">{{ $project?->name }}</dd>
                         </div>
                         <div>
                             <dt class="text-sm font-medium text-gray-400">Créé le</dt>
@@ -99,9 +101,13 @@
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-lg font-semibold text-white">Membres</h2>
                         @can('update', $project)
-                        <button class="text-sm text-indigo-400 hover:text-indigo-300">
+                        <a href="{{ route('projects.members.create', $project) }}" 
+                           class="text-sm text-indigo-400 hover:text-indigo-300 flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
                             Ajouter
-                        </button>
+                        </a>
                         @endcan
                     </div>
                     <ul class="space-y-3">
@@ -113,6 +119,19 @@
                                 </span>
                                 <span class="ml-3 text-sm text-white">{{ $member->name }}</span>
                             </div>
+                            @can('update', $project)
+                            <form action="{{ route('projects.members.destroy', ['project' => $project, 'member' => $member]) }}" 
+                                  method="POST" 
+                                  onsubmit="return confirm('Êtes-vous sûr de vouloir retirer ce membre ?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-sm text-red-400 hover:text-red-300">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </form>
+                            @endcan
                         </li>
                         @endforeach
                     </ul>
