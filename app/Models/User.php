@@ -101,5 +101,13 @@ class User extends Authenticatable implements MustVerifyEmail
         
         return $this->ownedProjects->merge($this->memberProjects);
     }
+
+    public function projects()
+    {
+        return $this->belongsToMany(Project::class)
+                    ->withPivot('role')
+                    ->withTimestamps();
+    }
+
 }
 

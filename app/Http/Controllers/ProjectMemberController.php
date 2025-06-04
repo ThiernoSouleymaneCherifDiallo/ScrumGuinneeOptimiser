@@ -9,10 +9,11 @@ use Illuminate\Support\Facades\Gate;
 
 class ProjectMemberController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
+    // Remove the constructor with middleware
+    // public function __construct()
+    // {
+    //     $this->middleware('auth');
+    // }
 
     public function create(Project $project)
     {

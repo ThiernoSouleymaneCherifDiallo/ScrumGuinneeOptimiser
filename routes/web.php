@@ -27,8 +27,20 @@ Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->grou
 
 // Project routes
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectMemberController;
+use App\Http\Controllers\TaskController;
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('projects', ProjectController::class);
+    
+    // Project members routes
+    Route::get('/projects/{project}/members/create', [ProjectMemberController::class, 'create'])->name('projects.members.create');
+    Route::post('/projects/{project}/members', [ProjectMemberController::class, 'store'])->name('projects.members.store');
+    Route::delete('/projects/{project}/members/{member}', [ProjectMemberController::class, 'destroy'])->name('projects.members.destroy');
+    
+    // Routes pour les tâches
+    Route::get('/projects/{project}/tasks/create', [TaskController::class, 'create'])->name('projects.tasks.create');
+    Route::post('/projects/{project}/tasks', [TaskController::class, 'store'])->name('projects.tasks.store');
 });
 
 require __DIR__.'/auth.php';
