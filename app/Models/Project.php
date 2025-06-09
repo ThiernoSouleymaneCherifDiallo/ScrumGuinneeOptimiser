@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Task; // ✅ Ici tu importes le bon modèle Task
 
 class Project extends Model
 {
@@ -18,8 +20,7 @@ class Project extends Model
 
     public function owner(): BelongsTo
     {
-        // return $this->belongsTo(User::class, 'owner_id');
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id'); // 👀 attention ici aussi
     }
 
     public function members(): BelongsToMany
@@ -29,4 +30,14 @@ class Project extends Model
                     ->withTimestamps();
     }
 
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    public function sprints(): HasMany
+    {
+        return $this->hasMany(Sprint::class);
+    }
 }
+

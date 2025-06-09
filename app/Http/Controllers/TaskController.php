@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Task;
 use App\Models\Project;
+use App\Models\Tasks;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -11,7 +12,13 @@ class TaskController extends Controller
 {
     public function __construct()
     {
+        // parent::__construct($param);
         $this->middleware('auth');
+    }
+
+    public function index(Project $project){
+        $tasks = $project->tasks()->latest()->get();
+        return view('tasks.index', compact('project' ,'tasks'));
     }
 
     public function create(Project $project)
@@ -34,7 +41,7 @@ class TaskController extends Controller
         $validated['reporter_id'] = Auth::id();
         $validated['status'] = 'open';
 
-        $task = Task::create($validated);
+        $task = tasks::create($validated);
 
         return redirect()->route('projects.show', $project)
                         ->with('success', 'Tâche créée avec succès.');

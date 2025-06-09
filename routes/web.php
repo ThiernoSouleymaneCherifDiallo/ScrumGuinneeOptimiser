@@ -41,6 +41,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Routes pour les tâches
     Route::get('/projects/{project}/tasks/create', [TaskController::class, 'create'])->name('projects.tasks.create');
     Route::post('/projects/{project}/tasks', [TaskController::class, 'store'])->name('projects.tasks.store');
+    Route::get('/projects/{project}/tasks/index', [TaskController::class, 'index'])->name('projects.tasks.index');
+});
+
+// Sprint routes
+use App\Http\Controllers\SprintController;
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('projects.sprints', SprintController::class);
 });
 
 require __DIR__.'/auth.php';
