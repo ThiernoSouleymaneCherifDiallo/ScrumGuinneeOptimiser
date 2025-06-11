@@ -1,6 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
+@if(session('success'))
+    <div class="mb-4 rounded-md bg-green-50 p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm font-medium text-green-800">
+                    {{ session('success') }}
+                </p>
+            </div>
+        </div>
+    </div>
+@endif
+
 <div class="container mx-auto px-4 py-8">
     <div class="mb-6">
         <div class="flex items-center justify-between">
@@ -78,6 +95,7 @@
                             Modifier
                         </a>
                         <button type="button" 
+                                onclick="openTaskModal()"
                                 class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                             <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
@@ -113,59 +131,156 @@
             </div>
 
             <!-- Tâches du sprint -->
-            <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-                <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">
-                            Tâches
-                        </h3>
-                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {{ $sprint->tasks->count() }} tâches
-                        </span>
-                    </div>
+            <div class="bg-gray-900 shadow overflow-hidden sm:rounded-lg">
+                <div class="px-4 py-5 sm:px-6 border-b border-gray-700">
+                    <h3 class="text-lg leading-6 font-medium text-white">
+                        Tâches du sprint
+                    </h3>
                 </div>
-                @if($sprint->tasks->isNotEmpty())
-                    <ul class="divide-y divide-gray-200">
-                        @foreach($sprint->tasks as $task)
-                            <li class="px-4 py-4 sm:px-6 hover:bg-gray-50">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <input type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" 
-                                               {{ $task->completed ? 'checked' : '' }}>
-                                        <p class="ml-3 text-sm font-medium text-gray-900">{{ $task->title }}</p>
+                <div class="bg-gray-800 overflow-hidden">
+                    <ul class="divide-y divide-gray-700" id="tasks-list">
+                        @forelse($sprint->tasks as $task)
+                            <li class="px-4 py-4 sm:px-6 hover:bg-gray-750 transition-colors duration-150 task-item" data-task-id="{{ $task->id }}">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center">
+                                            <!-- Menu déroulant pour le statut -->
+                                            <div class="relative inline-block text-left mr-3" x-data="{ open: false }">
+                                                <div>
+                                                    <button type="button" 
+                                                            @click="open = !open"
+                                                            class="inline-flex justify-center w-full rounded-md px-3 py-1 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500
+                                                            @if($task->status === 'todo') bg-gray-700 text-gray-300 hover:bg-gray-600
+                                                            @elseif($task->status === 'in_progress') bg-blue-900 text-blue-100 hover:bg-blue-800
+                                                            @elseif($task->status === 'review') bg-yellow-900 text-yellow-100 hover:bg-yellow-800
+                                                            @else bg-green-900 text-green-100 hover:bg-green-800 @endif">
+                                                        {{ ucfirst(str_replace('_', ' ', $task->status)) }}
+                                                        <svg class="-mr-1 ml-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                                <div x-show="open" 
+                                                     @click.away="open = false"
+                                                     x-transition:enter="transition ease-out duration-100"
+                                                     x-transition:enter-start="transform opacity-0 scale-95"
+                                                     x-transition:enter-end="transform opacity-100 scale-100"
+                                                     x-transition:leave="transition ease-in duration-75"
+                                                     x-transition:leave-start="transform opacity-100 scale-100"
+                                                     x-transition:leave-end="transform opacity-0 scale-95"
+                                                     class="origin-top-right absolute left-0 mt-2 w-40 rounded-md shadow-lg bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                                                    <div class="py-1">
+                                                        @foreach(['todo', 'in_progress', 'review', 'done'] as $status)
+                                                            <button type="button" 
+                                                                    @click="updateTaskStatus({{ $task->id }}, '{{ $status }}'); open = false;"
+                                                                    class="w-full text-left px-4 py-2 text-sm {{ $task->status === $status ? 'bg-gray-600 text-white' : 'text-gray-200 hover:bg-gray-600' }}">
+                                                                {{ ucfirst(str_replace('_', ' ', $status)) }}
+                                                            </button>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <p class="ml-2 text-sm font-medium text-white">
+                                                {{ $task->title }}
+                                            </p>
+                                        </div>
+                                        @if($task->description)
+                                            <p class="mt-1 text-sm text-gray-400 truncate">
+                                                {{ $task->description }}
+                                            </p>
+                                        @endif
                                     </div>
+                                    
                                     <div class="flex items-center space-x-2">
-                                        <span class="px-2.5 py-0.5 text-xs font-medium rounded-full 
-                                            {{ $task->priority === 'high' ? 'bg-red-100 text-red-800' : 
-                                               ($task->priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800') }}">
+                                        <!-- Menu déroulant pour l'assignation -->
+                                        <div class="relative inline-block text-left" x-data="{ open: false }">
+                                            <div>
+                                                <button type="button" 
+                                                        @click="open = !open"
+                                                        class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500">
+                                                    @if($task->assignee)
+                                                        <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-blue-500 text-xs font-medium text-white">
+                                                            {{ substr($task->assignee->name, 0, 1) }}
+                                                        </span>
+                                                    @else
+                                                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6z" />
+                                                        </svg>
+                                                    @endif
+                                                </button>
+                                            </div>
+                                            <div x-show="open" 
+                                                 @click.away="open = false"
+                                                 x-transition:enter="transition ease-out duration-100"
+                                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                                 x-transition:leave="transition ease-in duration-75"
+                                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                                 class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                                                <div class="py-1">
+                                                    <div class="px-4 py-2 text-xs text-gray-400 border-b border-gray-600">
+                                                        Assigner à
+                                                    </div>
+                                                    @foreach($project->members as $member)
+                                                        <button type="button" 
+                                                                @click="assignTask({{ $task->id }}, {{ $member->id }}); open = false;"
+                                                                class="w-full text-left px-4 py-2 text-sm flex items-center space-x-2 {{ $task->assignee_id === $member->id ? 'bg-gray-600 text-white' : 'text-gray-200 hover:bg-gray-600' }}">
+                                                            <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-blue-500 text-xs font-medium text-white">
+                                                                {{ substr($member->name, 0, 1) }}
+                                                            </span>
+                                                            <span>{{ $member->name }}</span>
+                                                        </button>
+                                                    @endforeach
+                                                    @if($task->assignee_id)
+                                                        <div class="border-t border-gray-600">
+                                                            <button type="button" 
+                                                                    @click="assignTask({{ $task->id }}, null); open = false;"
+                                                                    class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-600">
+                                                                Ne pas assigner
+                                                            </button>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        @if($task->story_points)
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-700 text-gray-300">
+                                                {{ $task->story_points }} pts
+                                            </span>
+                                        @endif
+                                        
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                            @if($task->priority === 'low') bg-green-900 text-green-100
+                                            @elseif($task->priority === 'medium') bg-yellow-900 text-yellow-100
+                                            @elseif($task->priority === 'high') bg-red-900 text-red-100
+                                            @else bg-purple-900 text-purple-100 @endif">
                                             {{ ucfirst($task->priority) }}
-                                        </span>
-                                        <span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                                            {{ $task->story_points ?? '0' }} pts
                                         </span>
                                     </div>
                                 </div>
                             </li>
-                        @endforeach
+                        @empty
+                            <li class="px-4 py-4 sm:px-6 text-center text-gray-400">
+                                Aucune tâche pour ce sprint.
+                            </li>
+                        @endforelse
                     </ul>
-                @else
-                    <div class="px-4 py-12 text-center">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                        <h3 class="mt-2 text-sm font-medium text-gray-900">Aucune tâche</h3>
-                        <p class="mt-1 text-sm text-gray-500">Commencez par ajouter des tâches à ce sprint.</p>
-                        <div class="mt-6">
-                            <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-                                </svg>
-                                Nouvelle tâche
-                            </button>
-                        </div>
+                </div>
+                @if(auth()->user()->can('create', [\App\Models\Task::class, $project]))
+                    <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                        <button type="button" @click="openTaskModal()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                            </svg>
+                            Nouvelle tâche
+                        </button>
                     </div>
                 @endif
             </div>
+        </div>
         </div>
 
         <!-- Colonne de droite - Métriques et actions -->
@@ -244,4 +359,247 @@
         </div>
     </div>
 </div>
+
+<!-- Modal de création de tâche -->
+<div id="taskModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Fond gris -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+
+        <!-- Contenu du modal -->
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        
+        <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+            <div>
+                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                        Nouvelle tâche
+                    </h3>
+                    <div class="mt-2">
+                        <form action="{{ route('projects.sprints.tasks.store', [$project, $sprint]) }}" method="POST">
+                            @csrf
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="title" class="block text-sm font-medium text-gray-700">Titre <span class="text-red-500">*</span></label>
+                                    <input type="text" name="title" id="title" required
+                                           class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                </div>
+                                
+                                <div>
+                                    <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                                    <textarea name="description" id="description" rows="3"
+                                              class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"></textarea>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="status" class="block text-sm font-medium text-gray-700">Statut</label>
+                                        <select id="status" name="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                            <option value="todo">À faire</option>
+                                            <option value="in_progress">En cours</option>
+                                            <option value="review">En revue</option>
+                                            <option value="done">Terminé</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="priority" class="block text-sm font-medium text-gray-700">Priorité</label>
+                                        <select id="priority" name="priority" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                            <option value="low">Basse</option>
+                                            <option value="medium" selected>Moyenne</option>
+                                            <option value="high">Haute</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label for="story_points" class="block text-sm font-medium text-gray-700">Points d'histoire</label>
+                                    <input type="number" name="story_points" id="story_points" min="0" value="1"
+                                           class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                </div>
+                            </div>
+                            
+                            <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
+                                <button type="submit"
+                                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 sm:text-sm">
+                                    Créer la tâche
+                                </button>
+                                <button type="button" onclick="closeTaskModal()"
+                                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 sm:text-sm">
+                                    Annuler
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    // Gestion du modal
+    function openTaskModal() {
+        document.getElementById('taskModal').classList.remove('hidden');
+    }
+
+    function closeTaskModal() {
+        document.getElementById('taskModal').classList.add('hidden');
+    }
+
+    // Fermer le modal si on clique en dehors
+    window.onclick = function(event) {
+        const modal = document.getElementById('taskModal');
+        if (event.target === modal) {
+            closeTaskModal();
+        }
+    }
+
+    // Fermer avec la touche Échap
+    document.onkeydown = function(evt) {
+        evt = evt || window.event;
+        if (evt.key === 'Escape') {
+            closeTaskModal();
+        }
+    };
+
+    // Mettre à jour le statut d'une tâche
+    window.updateTaskStatus = function(taskId, newStatus) {
+        var url = '/projects/{{ $project->id }}/sprints/{{ $sprint->id }}/tasks/' + taskId + '/status';
+        
+        axios.put(url, {
+            status: newStatus,
+            _token: '{{ csrf_token() }}',
+            _method: 'PUT'
+        })
+        .then(function(response) {
+            // Mettre à jour l'interface utilisateur
+            var taskItem = document.querySelector('.task-item[data-task-id="' + taskId + '"]');
+            if (taskItem) {
+                var statusButton = taskItem.querySelector('[x-data] button');
+                if (statusButton) {
+                    // Mettre à jour le texte du bouton
+                    statusButton.textContent = newStatus.replace('_', ' ').replace(/\b\w/g, function(l) { 
+                        return l.toUpperCase(); 
+                    });
+                    
+                    // Mettre à jour les classes en fonction du nouveau statut
+                    statusButton.className = 'inline-flex justify-center w-full rounded-md px-3 py-1 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500 ';
+                    
+                    if (newStatus === 'todo') {
+                        statusButton.classList.add('bg-gray-700', 'text-gray-300', 'hover:bg-gray-600');
+                    } else if (newStatus === 'in_progress') {
+                        statusButton.classList.add('bg-blue-900', 'text-blue-100', 'hover:bg-blue-800');
+                    } else if (newStatus === 'review') {
+                        statusButton.classList.add('bg-yellow-900', 'text-yellow-100', 'hover:bg-yellow-800');
+                    } else if (newStatus === 'done') {
+                        statusButton.classList.add('bg-green-900', 'text-green-100', 'hover:bg-green-800');
+                    }
+                }
+            }
+            
+            // Afficher une notification de succès
+            window.showNotification('Statut mis à jour avec succès', 'success');
+        })
+        .catch(function(error) {
+            console.error('Erreur lors de la mise à jour du statut:', error);
+            window.showNotification('Erreur lors de la mise à jour du statut', 'error');
+        });
+    };
+
+    // Assigner une tâche à un utilisateur
+    window.assignTask = function(taskId, userId) {
+        var url = '/projects/{{ $project->id }}/sprints/{{ $sprint->id }}/tasks/' + taskId + '/assign';
+        
+        // Préparer les données à envoyer
+        var formData = new FormData();
+        formData.append('assignee_id', userId);
+        formData.append('_token', '{{ csrf_token() }}');
+        formData.append('_method', 'PUT');
+        
+        // Envoyer la requête
+        axios.post(url, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        .then(function(response) {
+            // Mettre à jour l'interface utilisateur
+            var taskItem = document.querySelector('.task-item[data-task-id="' + taskId + '"]');
+            if (taskItem) {
+                var assigneeButton = taskItem.querySelector('[x-data] button');
+                var assigneeSpan = taskItem.querySelector('.assignee-avatar');
+                
+                if (assigneeButton) {
+                    if (userId) {
+                        // Trouver le membre dans la liste des membres du projet
+                        var members = '@json($project->members)';
+                        var member = null;
+                        for (var i = 0; i < members.length; i++) {
+                            if (members[i].id == userId) { // Utilisation de == au lieu de === pour la comparaison
+                                member = members[i];
+                                break;
+                            }
+                        }
+                        
+                        if (member) {
+                            if (assigneeSpan) {
+                                assigneeSpan.textContent = member.name.charAt(0).toUpperCase();
+                            } else {
+                                // Créer le span s'il n'existe pas
+                                var newSpan = document.createElement('span');
+                                newSpan.className = 'inline-flex items-center justify-center h-6 w-6 rounded-full bg-blue-500 text-xs font-medium text-white';
+                                newSpan.textContent = member.name.charAt(0).toUpperCase();
+                                assigneeButton.innerHTML = '';
+                                assigneeButton.appendChild(newSpan);
+                            }
+                        }
+                    } else {
+                        // Si aucun utilisateur n'est assigné, afficher l'icône par défaut
+                        assigneeButton.innerHTML = '\
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">\
+                                <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6z" />\
+                            </svg>\
+                        ';
+                    }
+                }
+            }
+            
+            // Afficher une notification de succès
+            window.showNotification('Tâche assignée avec succès', 'success');
+        })
+        .catch(function(error) {
+            console.error('Erreur lors de l\'assignation de la tâche:', error);
+            window.showNotification('Erreur lors de l\'assignation de la tâche', 'error');
+        });
+    };
+
+    // Afficher une notification
+    window.showNotification = function(message, type) {
+        type = type || 'success';
+        var notification = document.createElement('div');
+        var bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+        notification.className = 'fixed top-4 right-4 px-6 py-3 rounded-md shadow-lg text-white ' + bgColor;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        // Supprimer la notification après 3 secondes
+        window.setTimeout(function() {
+            notification.classList.add('opacity-0');
+            notification.classList.add('transition-opacity');
+            notification.classList.add('duration-500');
+            
+            window.setTimeout(function() {
+                if (notification && notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 500);
+        }, 3000);
+    };
+</script>
+@endpush
