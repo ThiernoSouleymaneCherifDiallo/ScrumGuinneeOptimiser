@@ -21,7 +21,7 @@ class ProjectController extends BaseController
     public function index()
     {
        $projects = \App\Models\Project::with('owner')
-        ->where('user_id', Auth::id())
+        ->where('owner_id', Auth::id())
         ->latest()
         ->get();
         return view('projects.index', compact('projects'));
