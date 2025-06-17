@@ -5,6 +5,7 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SummaryController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -20,10 +21,14 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+
+
 Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::post('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
 });
+
+
 
 // Project routes
 use App\Http\Controllers\ProjectController;
@@ -41,6 +46,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Routes pour les tâches
     Route::get('/projects/{project}/tasks/create', [TaskController::class, 'create'])->name('projects.tasks.create');
     Route::post('/projects/{project}/tasks', [TaskController::class, 'store'])->name('projects.tasks.store');
+
+    Route::get('/projects/{project}/resume', [SummaryController::class, 'show'])->name('projects.resume');
 });
 
 require __DIR__.'/auth.php';

@@ -54,15 +54,18 @@
                     </div>
 
                     <!-- Actions rapides -->
-                    <div class="flex space-x-4">
-                    <a href="{{ route('projects.tasks.create', [$project->id]) }}" 
-                        class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors inline-block text-center">
-                        Nouvelle tâche
-                    </a>
-
+                    <div class="flex space-x-4 mb-6">
+                        <a href="{{ route('projects.tasks.create', [$project->id]) }}" 
+                           class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors inline-block text-center">
+                            Nouvelle tâche
+                        </a>
                         <button class="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors">
                             Nouveau sprint
                         </button>
+                        <a href="{{ route('projects.resume', $project) }}" 
+                           class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition-colors inline-block text-center">
+                            Résumer
+                        </a>
                     </div>
                 </div>
             </div>
@@ -77,7 +80,7 @@
                     <dl class="space-y-4">
                         <div>
                             <dt class="text-sm font-medium text-gray-400">Propriétaire</dt>
-                            <dd class="mt-1 text-sm text-white">{{ $project?->name }}</dd>
+                            <dd class="mt-1 text-sm text-white">{{ $project->owner?->name ?? 'Non défini' }}</dd>
                         </div>
                         <div>
                             <dt class="text-sm font-medium text-gray-400">Créé le</dt>

@@ -16,7 +16,8 @@ class Task extends Model
         'assignee_id',
         'reporter_id',
         'due_date',
-        'project_id'
+        'project_id',
+        'epic_id'
     ];
 
     protected $casts = [
@@ -36,5 +37,10 @@ class Task extends Model
     public function reporter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reporter_id');
+    }
+
+    public function epic(): BelongsTo
+    {
+        return $this->belongsTo(Epic::class);
     }
 }

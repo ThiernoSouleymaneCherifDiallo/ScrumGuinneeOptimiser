@@ -47,7 +47,7 @@
                 </a>
             </li>
             <li>
-                <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                <a href="{{ route('projects.resume', $project ?? Auth::user()->ownedProjects->first()) }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                     <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M7.824 5.016a.5.5 0 0 1 .566 0 7.608 7.608 0 0 1 3.22 3.22.5.5 0 0 1 0 .566 7.608 7.608 0 0 1-3.22 3.22.5.5 0 0 1-.566 0 7.608 7.608 0 0 1-3.22-3.22.5.5 0 0 1 0-.566 7.608 7.608 0 0 1 3.22-3.22Z"/>
                         <path d="M10 0c4.3 0 8 3.033 8 7 0 1.887-.82 3.6-2.12 4.815a1 1 0 0 1-.283.35l-.66.51a1 1 0 0 1-1.2 0l-.66-.51a1 1 0 0 1-.283-.35A6.8 6.8 0 0 1 10 12c-4.3 0-8-3.033-8-7s3.7-7 8-7Z"/>

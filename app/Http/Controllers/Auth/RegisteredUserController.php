@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 use App\Models\Role;
+use Illuminate\Support\Facades\DB;
 
 class RegisteredUserController extends Controller
 {
@@ -36,17 +37,28 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role_id' => Role::where('name', 'Développeur')->first()->id,
-        ]);
+        return DB::transaction(function () use ($request) {
+            $role = Role::where('name', 'Développeur')->first();
+            
+            if (!$role) {
+                $role = Role::create([
+                    'name' => 'Développeur',
+                    'description' => 'Rôle par défaut pour les nouveaux développeurs'
+                ]);
+            }
 
-        event(new Registered($user));
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role_id' => $role->id,
+            ]);
 
-        Auth::login($user);
+            event(new Registered($user));
 
-        return redirect(route('dashboard', absolute: false));
+            Auth::login($user);
+
+            return redirect(route('dashboard', absolute: false));
+        });
     }
 }
