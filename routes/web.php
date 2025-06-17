@@ -47,6 +47,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // Sprint routes
 use App\Http\Controllers\SprintController;
 use App\Http\Controllers\SprintTaskController;
+use App\Http\Controllers\SprintSummaryController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Routes pour les sprints
@@ -56,6 +57,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/projects/{project}/sprints/{sprint}/tasks', [SprintTaskController::class, 'store'])->name('projects.sprints.tasks.store');
     Route::put('/projects/{project}/sprints/{sprint}/tasks/{task}/status', [SprintTaskController::class, 'updateStatus'])->name('sprints.tasks.update-status');
     Route::put('/projects/{project}/sprints/{sprint}/tasks/{task}/assign', [SprintTaskController::class, 'assignTask'])->name('sprints.tasks.assign');
+    
+    // Route pour le résumé du sprint
+    Route::get('/projects/{project}/sprints/{sprint}/summary', [SprintSummaryController::class, 'show'])->name('projects.sprints.summary');
 });
 
 require __DIR__.'/auth.php';
