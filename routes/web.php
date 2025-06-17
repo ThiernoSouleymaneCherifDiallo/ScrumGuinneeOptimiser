@@ -41,6 +41,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Routes pour les tâches
     Route::get('/projects/{project}/tasks/create', [TaskController::class, 'create'])->name('projects.tasks.create');
     Route::post('/projects/{project}/tasks', [TaskController::class, 'store'])->name('projects.tasks.store');
+    Route::get('/projects/{project}/tasks/index', [TaskController::class, 'index'])->name('projects.tasks.index');
+});
+
+// Sprint routes
+use App\Http\Controllers\SprintController;
+use App\Http\Controllers\SprintTaskController;
+use App\Http\Controllers\SprintSummaryController;
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Routes pour les sprints
+    Route::resource('projects.sprints', SprintController::class);
+    
+    // Routes pour les tâches des sprints
+    Route::post('/projects/{project}/sprints/{sprint}/tasks', [SprintTaskController::class, 'store'])->name('projects.sprints.tasks.store');
+    Route::put('/projects/{project}/sprints/{sprint}/tasks/{task}/status', [SprintTaskController::class, 'updateStatus'])->name('sprints.tasks.update-status');
+    Route::put('/projects/{project}/sprints/{sprint}/tasks/{task}/assign', [SprintTaskController::class, 'assignTask'])->name('sprints.tasks.assign');
+    
+    // Route pour le résumé du sprint
+    Route::get('/projects/{project}/sprints/{sprint}/summary', [SprintSummaryController::class, 'show'])->name('projects.sprints.summary');
 });
 
 require __DIR__.'/auth.php';

@@ -24,6 +24,7 @@ class ProjectController extends BaseController
         ->where('user_id', Auth::id())
         ->latest()
         ->get();
+        // dd($projects);
         return view('projects.index', compact('projects'));
     }
 
