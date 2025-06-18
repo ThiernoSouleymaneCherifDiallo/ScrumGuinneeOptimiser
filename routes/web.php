@@ -48,6 +48,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 use App\Http\Controllers\SprintController;
 use App\Http\Controllers\SprintTaskController;
 use App\Http\Controllers\SprintSummaryController;
+use App\Http\Controllers\BacklogController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Routes pour les sprints
@@ -60,6 +61,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Route pour le résumé du sprint
     Route::get('/projects/{project}/sprints/{sprint}/summary', [SprintSummaryController::class, 'show'])->name('projects.sprints.summary');
+    
+    // Route pour le backlog
+    Route::get('/projects/{project}/backlog', [BacklogController::class, 'index'])->name('projects.backlog.index');
 });
 
 require __DIR__.'/auth.php';
+

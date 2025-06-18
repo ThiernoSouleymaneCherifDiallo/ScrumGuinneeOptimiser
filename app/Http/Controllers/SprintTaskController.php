@@ -43,7 +43,7 @@ class SprintTaskController extends Controller
     public function assignTask(Request $request, Project $project, Sprint $sprint, Task $task)
     {
         $request->validate([
-            'assignee_id' => 'required|exists:users,id',
+            'assignee_id' => 'nullable|exists:users,id',
         ]);
 
         $task->update(['assignee_id' => $request->assignee_id]);

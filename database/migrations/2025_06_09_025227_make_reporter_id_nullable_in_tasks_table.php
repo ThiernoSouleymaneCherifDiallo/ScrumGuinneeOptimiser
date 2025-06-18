@@ -12,8 +12,22 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tasks', function (Blueprint $table) {
-            // Supprimer la contrainte de clé étrangère existante
-            $table->dropForeign(['reporter_id']);
+            // Vérifier si la contrainte existe avant de la supprimer
+            $foreignKeys = Schema::getConnection()
+                ->getDoctrineSchemaManager()
+                ->listTableForeignKeys('tasks');
+            
+            $constraintExists = false;
+            foreach ($foreignKeys as $foreignKey) {
+                if (in_array('reporter_id', $foreignKey->getLocalColumns())) {
+                    $constraintExists = true;
+                    break;
+                }
+            }
+            
+            if ($constraintExists) {
+                $table->dropForeign(['reporter_id']);
+            }
             
             // Recréer la colonne en tant que nullable
             $table->foreignId('reporter_id')

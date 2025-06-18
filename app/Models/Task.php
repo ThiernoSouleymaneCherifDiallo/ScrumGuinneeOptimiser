@@ -16,7 +16,9 @@ class Task extends Model
         'assignee_id',
         'reporter_id',
         'due_date',
-        'project_id'
+        'project_id',
+        'sprint_id',
+        'story_points'
     ];
 
     protected $casts = [
@@ -26,6 +28,11 @@ class Task extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function sprint(): BelongsTo
+    {
+        return $this->belongsTo(Sprint::class);
     }
 
     public function assignee(): BelongsTo

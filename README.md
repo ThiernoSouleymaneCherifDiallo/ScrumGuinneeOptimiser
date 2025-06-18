@@ -70,3 +70,13 @@ Modèles Sprint et Task (relations)
 SprintController (CRUD)
 Vue Blade pour afficher backlog et sprints avec tâches
 (Optionnel) Ajout du drag & drop JS
+
+
+Qu'est-ce qu'on peut encore améliorer ? Par exemple :
+Ajouter un tableau Kanban pour les tâches ?
+Améliorer les métriques du sprint ?
+Ajouter des notifications en temps réel ?
+Créer des rapports de sprint ?
+Ajouter des commentaires sur les tâches ?
+
+au niveau de l'ajout d'un utilisateur ça doit etre une recherche et non une selection qwa 
