@@ -18,11 +18,13 @@ class Task extends Model
         'due_date',
         'project_id',
         'sprint_id',
-        'story_points'
+        'story_points',
+        'is_blocked'
     ];
 
     protected $casts = [
-        'due_date' => 'date'
+        'due_date' => 'date',
+        'is_blocked' => 'boolean'
     ];
 
     public function project(): BelongsTo

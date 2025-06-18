@@ -61,6 +61,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Route pour le résumé du sprint
     Route::get('/projects/{project}/sprints/{sprint}/summary', [SprintSummaryController::class, 'show'])->name('projects.sprints.summary');
+    Route::get('/projects/{project}/sprints/{sprint}/summary/data', [SprintSummaryController::class, 'getData'])->name('projects.sprints.summary.data');
     
     // Route pour le backlog
     Route::get('/projects/{project}/backlog', [BacklogController::class, 'index'])->name('projects.backlog.index');

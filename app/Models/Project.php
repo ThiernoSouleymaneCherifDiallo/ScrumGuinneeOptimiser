@@ -16,11 +16,12 @@ class Project extends Model
         'key',
         'status',
         'owner_id',
+        'user_id',
     ];
 
     public function owner(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id'); // 👀 attention ici aussi
+        return $this->belongsTo(User::class, 'owner_id');
     }
 
     public function members(): BelongsToMany

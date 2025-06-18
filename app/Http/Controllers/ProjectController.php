@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Gate;
 
@@ -20,12 +21,22 @@ class ProjectController extends BaseController
 
     public function index()
     {
-       $projects = \App\Models\Project::with('owner')
-        ->where('user_id', Auth::id())
-        ->latest()
-        ->get();
-        // dd($projects);
-        return view('projects.index', compact('projects'));
+        $projects = \App\Models\Project::with(['owner', 'sprints', 'tasks'])
+            ->withCount(['sprints', 'tasks'])
+            ->where('owner_id', Auth::id())
+            ->latest()
+            ->paginate(10);
+
+        // Calculer les métriques globales
+        $activeSprintsCount = \App\Models\Sprint::whereHas('project', function ($query) {
+            $query->where('owner_id', Auth::id());
+        })->where('status', 'active')->count();
+
+        $openTasksCount = \App\Models\Task::whereHas('project', function ($query) {
+            $query->where('owner_id', Auth::id());
+        })->where('status', '!=', 'done')->count();
+
+        return view('projects.index', compact('projects', 'activeSprintsCount', 'openTasksCount'));
     }
 
     public function create()
@@ -41,17 +52,22 @@ class ProjectController extends BaseController
             'key' => 'required|unique:projects,key|max:10|alpha_num',
         ]);
 
-        // Ajout du owner_id automatiquement
+        // Ajout du owner_id et user_id automatiquement
         $validated['owner_id'] = Auth::id();
+        $validated['user_id'] = Auth::id(); // Ajouter user_id aussi
+        $validated['status'] = 'active'; // Définir un statut par défaut
         
         try {
             $project = Project::create($validated);
+            
+            // Ajouter l'utilisateur comme membre du projet
             $project->members()->attach(Auth::id(), ['role' => 'admin']);
 
-            return redirect()->route('projects.show', $project)
-                            ->with('success', 'Projet créé avec succès.');
+            return redirect()->route('projects.index')
+                            ->with('success', 'Projet "' . $project->name . '" créé avec succès.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Erreur lors de la création du projet.');
+            Log::error('Erreur création projet: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Erreur lors de la création du projet: ' . $e->getMessage());
         }
     }
 

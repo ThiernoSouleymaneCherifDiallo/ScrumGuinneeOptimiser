@@ -41,7 +41,7 @@ class ProjectMemberController extends Controller
 
         try {
             $project->members()->attach($validated['user_id'], ['role' => $validated['role']]);
-            return redirect()->route('projects.show', $project)
+            return redirect()->route('projects.index', $project)
                             ->with('success', 'Membre ajouté avec succès.');
         } catch (\Exception $e) {
             return back()->with('error', 'Erreur lors de l\'ajout du membre.');

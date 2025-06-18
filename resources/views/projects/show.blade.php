@@ -77,7 +77,7 @@
                     <dl class="space-y-4">
                         <div>
                             <dt class="text-sm font-medium text-gray-400">Propriétaire</dt>
-                            <dd class="mt-1 text-sm text-white">{{ $project?->name }}</dd>
+                            <dd class="mt-1 text-sm text-white">{{ $project->owner->name }}</dd>
                         </div>
                         <div>
                             <dt class="text-sm font-medium text-gray-400">Créé le</dt>
