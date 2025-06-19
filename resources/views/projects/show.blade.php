@@ -63,6 +63,10 @@
                         <button class="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors">
                             Nouveau sprint
                         </button>
+                        
+                        <a href="{{ route('projects.chat.detached', $project) }}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                            Ouvrir le chat
+                        </a>
                     </div>
                 </div>
             </div>
@@ -77,7 +81,7 @@
                     <dl class="space-y-4">
                         <div>
                             <dt class="text-sm font-medium text-gray-400">Propriétaire</dt>
-                            <dd class="mt-1 text-sm text-white">{{ $project?->name }}</dd>
+                            <dd class="mt-1 text-sm text-white">{{ $project->owner->name }}</dd>
                         </div>
                         <div>
                             <dt class="text-sm font-medium text-gray-400">Créé le</dt>

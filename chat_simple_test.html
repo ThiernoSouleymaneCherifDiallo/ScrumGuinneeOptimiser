@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Chat Simple</title>
+    <style>
+        body { 
+            background: #1D2125; 
+            color: white; 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+        }
+        .header { 
+            background: #22272B; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            border: 1px solid #3C3F42; 
+        }
+        .messages { 
+            background: #22272B; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            border: 1px solid #3C3F42; 
+            height: 400px; 
+            overflow-y: auto; 
+        }
+        .form { 
+            background: #22272B; 
+            padding: 20px; 
+            border-radius: 8px; 
+            border: 1px solid #3C3F42; 
+        }
+        .form input { 
+            width: 70%; 
+            padding: 10px; 
+            background: #1D2125; 
+            border: 1px solid #3C3F42; 
+            color: white; 
+            border-radius: 4px; 
+        }
+        .form button { 
+            width: 25%; 
+            padding: 10px; 
+            background: #0066CC; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+        }
+        .form button:hover { 
+            background: #0052A3; 
+        }
+        .message { 
+            margin-bottom: 10px; 
+            padding: 10px; 
+            background: #2C333A; 
+            border-radius: 4px; 
+        }
+        .message.own { 
+            background: #0066CC; 
+            text-align: right; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Test Chat Simple</h1>
+            <p>Projet: Test Project</p>
+        </div>
+        
+        <div id="messages" class="messages">
+            <div class="message">
+                <strong>Test User:</strong> Salut tout le monde !
+            </div>
+        </div>
+        
+        <form id="chat-form" class="form">
+            <input type="hidden" name="_token" value="test-token">
+            <input type="text" id="message-input" name="content" placeholder="Tapez votre message..." required>
+            <button type="submit">Envoyer</button>
+        </form>
+    </div>
+
+    <script>
+        console.log('=== TEST CHAT SIMPLE ===');
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM chargé!');
+            
+            const form = document.getElementById('chat-form');
+            const input = document.getElementById('message-input');
+            const button = document.querySelector('button[type="submit"]');
+            
+            console.log('Form:', form);
+            console.log('Input:', input);
+            console.log('Button:', button);
+            
+            if (form && input && button) {
+                console.log('Tous les éléments trouvés!');
+                
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    console.log('=== FORMULAIRE SOUMIS ===');
+                    
+                    const message = input.value.trim();
+                    console.log('Message:', message);
+                    
+                    if (!message) {
+                        console.log('Message vide!');
+                        return;
+                    }
+                    
+                    // Créer les données
+                    const formData = new FormData();
+                    formData.append('content', message);
+                    formData.append('_token', 'test-token');
+                    
+                    // Changer le bouton
+                    button.textContent = 'Envoi...';
+                    button.disabled = true;
+                    
+                    console.log('Envoi vers: /test-chat');
+                    
+                    // Envoyer
+                    fetch('/test-chat', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(function(response) {
+                        console.log('Réponse reçue:', response);
+                        return response.text();
+                    })
+                    .then(function(text) {
+                        console.log('Texte reçu:', text);
+                        
+                        try {
+                            const data = JSON.parse(text);
+                            console.log('JSON parsé:', data);
+                            
+                            if (data.success) {
+                                console.log('SUCCÈS! Message ajouté');
+                                input.value = '';
+                                
+                                // Ajouter le message à l'interface
+                                const messagesContainer = document.getElementById('messages');
+                                const messageHtml = `
+                                    <div class="message own">
+                                        <strong>Vous:</strong> ${message}
+                                    </div>
+                                `;
+                                messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
+                                
+                                // Scroll en bas
+                                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                                
+                                alert('Message envoyé avec succès!');
+                            } else {
+                                console.error('Erreur:', data);
+                                alert('Erreur: ' + (data.error || 'Erreur inconnue'));
+                            }
+                        } catch (e) {
+                            console.error('Erreur parsing JSON:', e);
+                            console.log('Réponse non-JSON:', text);
+                            alert('Erreur: Réponse non-JSON reçue');
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Erreur fetch:', error);
+                        alert('Erreur réseau: ' + error.message);
+                    })
+                    .finally(function() {
+                        // Restaurer le bouton
+                        button.textContent = 'Envoyer';
+                        button.disabled = false;
+                    });
+                });
+                
+                console.log('Événement submit ajouté!');
+            } else {
+                console.error('Éléments manquants!');
+            }
+        });
+        
+        console.log('=== SCRIPT TERMINÉ ===');
+    </script>
+</body>
+</html> 

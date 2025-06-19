@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Chat</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+</head>
+<body>
+    <h1>Test Chat</h1>
+    
+    <form id="chat-form">
+        <input type="text" id="message" placeholder="Votre message" required>
+        <button type="submit">Envoyer</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <script>
+        document.getElementById('chat-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const message = document.getElementById('message').value;
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
+            console.log('Envoi du message:', message);
+            
+            const formData = new FormData();
+            formData.append('content', message);
+            formData.append('_token', token);
+            
+            fetch('/test-chat', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                console.log('Réponse:', response);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Données:', data);
+                document.getElementById('result').innerHTML = '<p>Succès: ' + JSON.stringify(data) + '</p>';
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                document.getElementById('result').innerHTML = '<p>Erreur: ' + error.message + '</p>';
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -93,6 +93,14 @@
                         
                         <!-- Boutons d'action -->
                         <div class="mt-6 lg:mt-0 flex flex-wrap gap-3">
+                            <a href="{{ route('projects.sprints.summary', [$project, $sprint]) }}"
+                               class="inline-flex items-center px-4 py-2 bg-purple-600 border border-purple-500 rounded-lg text-sm font-medium text-white hover:bg-purple-700 hover:border-purple-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-900 shadow-lg shadow-purple-500/25">
+                                <svg class="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
+                                    <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
+                                </svg>
+                                Résumé
+                            </a>
                             <a href="{{ route('projects.sprints.edit', [$project, $sprint]) }}"
                                class="inline-flex items-center px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm font-medium text-slate-200 hover:bg-slate-700 hover:border-slate-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900">
                                 <svg class="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">

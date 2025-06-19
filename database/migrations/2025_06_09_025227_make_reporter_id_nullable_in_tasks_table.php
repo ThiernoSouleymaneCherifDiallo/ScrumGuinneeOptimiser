@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,30 +12,27 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('tasks', function (Blueprint $table) {
-            // Vérifier si la contrainte existe avant de la supprimer
-            $foreignKeys = Schema::getConnection()
-                ->getDoctrineSchemaManager()
-                ->listTableForeignKeys('tasks');
-            
-            $constraintExists = false;
-            foreach ($foreignKeys as $foreignKey) {
-                if (in_array('reporter_id', $foreignKey->getLocalColumns())) {
-                    $constraintExists = true;
-                    break;
-                }
-            }
-            
-            if ($constraintExists) {
+        // Vérifier si la contrainte existe avant de la supprimer
+        $constraints = DB::select("
+            SELECT CONSTRAINT_NAME 
+            FROM information_schema.TABLE_CONSTRAINTS 
+            WHERE TABLE_SCHEMA = DATABASE() 
+            AND TABLE_NAME = 'tasks' 
+            AND CONSTRAINT_NAME = 'tasks_reporter_id_foreign'
+        ");
+
+        if (!empty($constraints)) {
+            Schema::table('tasks', function (Blueprint $table) {
                 $table->dropForeign(['reporter_id']);
-            }
-            
-            // Recréer la colonne en tant que nullable
-            $table->foreignId('reporter_id')
-                  ->nullable()
-                  ->constrained('users')
-                  ->nullOnDelete()
-                  ->change();
+            });
+        }
+
+        // Modifier la colonne pour la rendre nullable
+        DB::statement('ALTER TABLE tasks MODIFY reporter_id BIGINT UNSIGNED NULL');
+        
+        // Recréer la contrainte de clé étrangère
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->foreign('reporter_id')->references('id')->on('users')->nullOnDelete();
         });
     }
 
@@ -43,15 +41,17 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Supprimer la contrainte de clé étrangère
         Schema::table('tasks', function (Blueprint $table) {
-            // Supprimer la contrainte de clé étrangère nullable
             $table->dropForeign(['reporter_id']);
-            
-            // Recréer la colonne en tant que non nullable
-            $table->foreignId('reporter_id')
-                  ->constrained('users')
-                  ->cascadeOnDelete()
-                  ->change();
+        });
+
+        // Modifier la colonne pour la rendre non nullable
+        DB::statement('ALTER TABLE tasks MODIFY reporter_id BIGINT UNSIGNED NOT NULL');
+        
+        // Recréer la contrainte de clé étrangère
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->foreign('reporter_id')->references('id')->on('users')->cascadeOnDelete();
         });
     }
 };

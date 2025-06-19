@@ -46,17 +46,26 @@
                 </a>
             </li>
             <li>
-                <a href="{{ isset($project) && isset($sprint) ? route('projects.sprints.summary', ['project' => $project, 'sprint' => $sprint]) : '#' }}" class="flex items-center p-2 text-slate-200 rounded-lg hover:bg-[#232b36] group">
-                    <svg class="flex-shrink-0 w-5 h-5 text-slate-400 transition duration-75 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M7.824 5.016a.5.5 0 0 1 .566 0 7.608 7.608 0 0 1 3.22 3.22.5.5 0 0 1 0 .566 7.608 7.608 0 0 1-3.22 3.22.5.5 0 0 1-.566 0 7.608 7.608 0 0 1-3.22-3.22.5.5 0 0 1 0-.566 7.608 7.608 0 0 1 3.22-3.22Z"/>
-                        <path d="M10 0c4.3 0 8 3.033 8 7 0 1.887-.82 3.6-2.12 4.815a1 1 0 0 1-.283.35l-.66.51a1 1 0 0 1-1.2 0l-.66-.51a1 1 0 0 1-.283-.35A6.8 6.8 0 0 1 10 12c-4.3 0-8-3.033-8-7s3.7-7 8-7Z"/>
-                    </svg>
-                    <span class="flex-1 ms-3 whitespace-nowrap">Résumé</span>
-                </a>
-               
+                @if(isset($project) && isset($sprint))
+                    <a href="{{ route('projects.sprints.summary', ['project' => $project, 'sprint' => $sprint]) }}" class="flex items-center p-2 text-slate-200 rounded-lg hover:bg-[#232b36] group">
+                        <svg class="flex-shrink-0 w-5 h-5 text-slate-400 transition duration-75 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"/>
+                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"/>
+                        </svg>
+                        <span class="flex-1 ms-3 whitespace-nowrap">Résumé Sprint</span>
+                    </a>
+                @else
+                    <div class="flex items-center p-2 text-slate-500 rounded-lg cursor-not-allowed">
+                        <svg class="flex-shrink-0 w-5 h-5 text-slate-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"/>
+                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"/>
+                        </svg>
+                        <span class="flex-1 ms-3 whitespace-nowrap">Résumé Sprint</span>
+                    </div>
+                @endif
             </li>
             <li>
-                <a href="{{ isset($project) && isset($sprint) ? route('projects.sprints.summary', ['project' => $project, 'sprint' => $sprint]) : '#' }}" class="flex items-center p-2 text-slate-200 rounded-lg hover:bg-[#232b36] group">
+                <a href="#" class="flex items-center p-2 text-slate-200 rounded-lg hover:bg-[#232b36] group">
                     <svg class="flex-shrink-0 w-5 h-5 text-slate-400 transition duration-75 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M7.824 5.016a.5.5 0 0 1 .566 0 7.608 7.608 0 0 1 3.22 3.22.5.5 0 0 1 0 .566 7.608 7.608 0 0 1-3.22 3.22.5.5 0 0 1-.566 0 7.608 7.608 0 0 1-3.22-3.22.5.5 0 0 1 0-.566 7.608 7.608 0 0 1 3.22-3.22Z"/>
                         <path d="M10 0c4.3 0 8 3.033 8 7 0 1.887-.82 3.6-2.12 4.815a1 1 0 0 1-.283.35l-.66.51a1 1 0 0 1-1.2 0l-.66-.51a1 1 0 0 1-.283-.35A6.8 6.8 0 0 1 10 12c-4.3 0-8-3.033-8-7s3.7-7 8-7Z"/>
@@ -67,8 +76,7 @@
             <li>
                 <a href="#" class="flex items-center p-2 text-slate-200 rounded-lg hover:bg-[#232b36] group">
                     <svg class="flex-shrink-0 w-5 h-5 text-slate-400 transition duration-75 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M7.824 5.016a.5.5 0 0 1 .566 0 7.608 7.608 0 0 1 3.22 3.22.5.5 0 0 1 0 .566 7.608 7.608 0 0 1-3.22 3.22.5.5 0 0 1-.566 0 7.608 7.608 0 0 1-3.22-3.22.5.5 0 0 1 0-.566 7.608 7.608 0 0 1 3.22-3.22Z"/>
-                        <path d="M10 0c4.3 0 8 3.033 8 7 0 1.887-.82 3.6-2.12 4.815a1 1 0 0 1-.283.35l-.66.51a1 1 0 0 1-1.2 0l-.66-.51a1 1 0 0 1-.283-.35A6.8 6.8 0 0 1 10 12c-4.3 0-8-3.033-8-7s3.7-7 8-7Z"/>
+                        <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
                     </svg>
                     <span class="flex-1 ms-3 whitespace-nowrap">Paramètres</span>
                 </a>
