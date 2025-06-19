@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ProjectMessage extends Model
 {
@@ -16,7 +17,12 @@ class ProjectMessage extends Model
         'type',
         'metadata',
         'is_edited',
-        'edited_at'
+        'edited_at',
+        'filename',
+        'original_name',
+        'file_path',
+        'file_size',
+        'file_type'
     ];
 
     protected $casts = [
@@ -27,7 +33,10 @@ class ProjectMessage extends Model
 
     protected $appends = [
         'formatted_time',
-        'is_own_message'
+        'is_own_message',
+        'has_file',
+        'file_url',
+        'formatted_file_size'
     ];
 
     public function project(): BelongsTo
@@ -81,5 +90,53 @@ class ProjectMessage extends Model
     public function isReadBy(int $userId): bool
     {
         return $this->reads()->where('user_id', $userId)->exists();
+    }
+
+    public function getHasFileAttribute(): bool
+    {
+        return !empty($this->filename) && !empty($this->file_path);
+    }
+
+    public function getFileUrlAttribute(): ?string
+    {
+        if (!$this->has_file) {
+            return null;
+        }
+        
+        return Storage::url($this->file_path);
+    }
+
+    public function getFormattedFileSizeAttribute(): ?string
+    {
+        if (!$this->file_size) {
+            return null;
+        }
+
+        $bytes = $this->file_size;
+        $units = ['B', 'KB', 'MB', 'GB'];
+        
+        for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
+            $bytes /= 1024;
+        }
+        
+        return round($bytes, 2) . ' ' . $units[$i];
+    }
+
+    public function isImage(): bool
+    {
+        return in_array($this->file_type, ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']);
+    }
+
+    public function isPdf(): bool
+    {
+        return $this->file_type === 'application/pdf';
+    }
+
+    public function deleteFile(): bool
+    {
+        if ($this->has_file && Storage::exists($this->file_path)) {
+            return Storage::delete($this->file_path);
+        }
+        return false;
     }
 } 

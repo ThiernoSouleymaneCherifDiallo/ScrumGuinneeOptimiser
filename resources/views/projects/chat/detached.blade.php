@@ -165,6 +165,63 @@
                                 {!! nl2br(e($message->content)) !!}
                             </div>
                             
+                            <!-- Affichage des fichiers -->
+                            @if($message->has_file)
+                                <div class="mt-3 p-3 bg-gray-800 rounded-lg border border-gray-700">
+                                    @if($message->isImage())
+                                        <div class="space-y-2">
+                                            <div class="flex items-center space-x-2 text-sm text-jira-gray">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                </svg>
+                                                <span>{{ $message->original_name }}</span>
+                                                <span class="text-xs">({{ $message->formatted_file_size }})</span>
+                                            </div>
+                                            <div class="relative group">
+                                                <img src="{{ $message->file_url }}" alt="{{ $message->original_name }}" 
+                                                     class="max-w-full max-h-64 rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                                     onclick="openImageModal('{{ $message->file_url }}', '{{ $message->original_name }}')">
+                                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-lg flex items-center justify-center">
+                                                    <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @elseif($message->isPdf())
+                                        <div class="flex items-center space-x-3 p-3 bg-gray-900 rounded-lg border border-gray-600 hover:border-gray-500 transition-colors">
+                                            <div class="flex-shrink-0">
+                                                <svg class="w-10 h-10 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                                                </svg>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-white truncate">{{ $message->original_name }}</p>
+                                                <p class="text-xs text-jira-gray">{{ $message->formatted_file_size }}</p>
+                                            </div>
+                                            <div class="flex-shrink-0 flex space-x-2">
+                                                <a href="{{ route('projects.chat.download', ['project' => $project, 'message' => $message]) }}" 
+                                                   class="text-blue-400 hover:text-blue-300 transition-colors p-2 rounded hover:bg-gray-700"
+                                                   title="Télécharger">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                    </svg>
+                                                </a>
+                                                <a href="{{ $message->file_url }}" target="_blank" 
+                                                   class="text-green-400 hover:text-green-300 transition-colors p-2 rounded hover:bg-gray-700"
+                                                   title="Ouvrir">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                                    </svg>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+                            
                             <!-- Actions du message -->
                             <div class="flex items-center space-x-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
                                 @if($message->user_id === auth()->id())
@@ -207,7 +264,7 @@
 
     <!-- Zone de saisie améliorée -->
     <div class="bg-gradient-to-r from-jira-card to-gray-800 border-t border-jira p-4 shadow-lg">
-        <form id="chat-form" class="flex items-end space-x-3">
+        <form id="chat-form" class="flex items-end space-x-3" enctype="multipart/form-data">
             @csrf
             <div class="flex-1">
                 <div class="relative">
@@ -227,9 +284,30 @@
                             </svg>
                         </button>
                         
-                        <button type="button" onclick="toggleFileUpload()" class="text-jira-gray hover:text-white transition-colors p-1 rounded hover:bg-gray-700">
+                        <button type="button" onclick="document.getElementById('file-input').click()" class="text-jira-gray hover:text-white transition-colors p-1 rounded hover:bg-gray-700">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Input file caché -->
+                <input type="file" id="file-input" name="file" accept=".jpg,.jpeg,.png,.gif,.pdf" class="hidden" onchange="handleFileSelect(this)">
+                
+                <!-- Zone d'affichage du fichier sélectionné -->
+                <div id="file-preview" class="hidden mt-3 p-3 bg-gray-800 rounded-lg border border-gray-700">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div id="file-icon" class="flex-shrink-0"></div>
+                            <div>
+                                <p id="file-name" class="text-sm font-medium text-white"></p>
+                                <p id="file-size" class="text-xs text-jira-gray"></p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="removeFile()" class="text-red-400 hover:text-red-300 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                         </button>
                     </div>
@@ -307,6 +385,12 @@
                     formData.append('content', message);
                     formData.append('_token', token);
                     
+                    // Ajouter le fichier s'il y en a un
+                    const fileInput = document.getElementById('file-input');
+                    if (fileInput.files[0]) {
+                        formData.append('file', fileInput.files[0]);
+                    }
+                    
                     // Désactiver le bouton
                     const submitBtn = form.querySelector('button[type="submit"]');
                     const originalText = submitBtn.textContent;
@@ -340,8 +424,76 @@
                                 input.style.height = 'auto';
                                 if (charCount) charCount.textContent = '0';
                                 
+                                // Nettoyer le fichier sélectionné
+                                removeFile();
+                                
                                 // Ajouter le message à l'interface (en bas)
                                 const messages = document.getElementById('messages');
+                                let fileHtml = '';
+                                
+                                // Ajouter l'affichage du fichier s'il y en a un
+                                if (data.message.has_file) {
+                                    if (data.message.is_image) {
+                                        fileHtml = `
+                                            <div class="mt-3 p-3 bg-gray-800 rounded-lg border border-gray-700">
+                                                <div class="space-y-2">
+                                                    <div class="flex items-center space-x-2 text-sm text-jira-gray">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                        </svg>
+                                                        <span>${data.message.original_name}</span>
+                                                        <span class="text-xs">(${data.message.formatted_file_size})</span>
+                                                    </div>
+                                                    <div class="relative group">
+                                                        <img src="${data.message.file_url}" alt="${data.message.original_name}" 
+                                                             class="max-w-full max-h-64 rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                                             onclick="openImageModal('${data.message.file_url}', '${data.message.original_name}')">
+                                                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-lg flex items-center justify-center">
+                                                            <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                                                                </svg>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `;
+                                    } else {
+                                        fileHtml = `
+                                            <div class="mt-3 p-3 bg-gray-800 rounded-lg border border-gray-700">
+                                                <div class="flex items-center space-x-3 p-3 bg-gray-900 rounded-lg border border-gray-600 hover:border-gray-500 transition-colors">
+                                                    <div class="flex-shrink-0">
+                                                        <svg class="w-10 h-10 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-sm font-medium text-white truncate">${data.message.original_name}</p>
+                                                        <p class="text-xs text-jira-gray">${data.message.formatted_file_size}</p>
+                                                    </div>
+                                                    <div class="flex-shrink-0 flex space-x-2">
+                                                        <a href="/projects/{{ $project->id }}/chat/${data.message.id}/download" 
+                                                           class="text-blue-400 hover:text-blue-300 transition-colors p-2 rounded hover:bg-gray-700"
+                                                           title="Télécharger">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                            </svg>
+                                                        </a>
+                                                        <a href="${data.message.file_url}" target="_blank" 
+                                                           class="text-green-400 hover:text-green-300 transition-colors p-2 rounded hover:bg-gray-700"
+                                                           title="Ouvrir">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                                            </svg>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }
+                                }
+                                
                                 const messageHtml = `
                                     <div class="message-item group message-enter" data-message-id="${data.message.id}">
                                         <div class="flex items-start space-x-3 justify-end">
@@ -353,6 +505,7 @@
                                                     <div class="text-white leading-relaxed text-sm">
                                                         ${data.message.content}
                                                     </div>
+                                                    ${fileHtml}
                                                 </div>
                                             </div>
                                             <div class="flex-shrink-0">
@@ -415,6 +568,115 @@
             
             window.toggleFileUpload = function() {
                 showNotification('Upload de fichiers à venir !', 'info');
+            };
+            
+            // Fonctions pour la gestion des fichiers
+            window.handleFileSelect = function(input) {
+                const file = input.files[0];
+                if (!file) return;
+                
+                // Vérifier la taille (5MB max)
+                const maxSize = 5 * 1024 * 1024; // 5MB en bytes
+                if (file.size > maxSize) {
+                    showNotification('Le fichier est trop volumineux. Taille maximum : 5MB', 'error');
+                    input.value = '';
+                    return;
+                }
+                
+                // Vérifier le type de fichier
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'application/pdf'];
+                if (!allowedTypes.includes(file.type)) {
+                    showNotification('Type de fichier non autorisé. Seuls les images (JPG, PNG, GIF) et PDF sont acceptés.', 'error');
+                    input.value = '';
+                    return;
+                }
+                
+                // Afficher la prévisualisation
+                const preview = document.getElementById('file-preview');
+                const fileName = document.getElementById('file-name');
+                const fileSize = document.getElementById('file-size');
+                const fileIcon = document.getElementById('file-icon');
+                
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                
+                // Icône selon le type
+                if (file.type.startsWith('image/')) {
+                    fileIcon.innerHTML = `
+                        <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    `;
+                } else {
+                    fileIcon.innerHTML = `
+                        <svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                        </svg>
+                    `;
+                }
+                
+                preview.classList.remove('hidden');
+                showNotification('Fichier sélectionné : ' + file.name, 'success');
+            };
+            
+            window.removeFile = function() {
+                document.getElementById('file-input').value = '';
+                document.getElementById('file-preview').classList.add('hidden');
+                showNotification('Fichier supprimé', 'info');
+            };
+            
+            window.formatFileSize = function(bytes) {
+                if (bytes === 0) return '0 B';
+                const k = 1024;
+                const sizes = ['B', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            };
+            
+            window.openImageModal = function(imageUrl, imageName) {
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4';
+                modal.innerHTML = `
+                    <div class="relative max-w-4xl max-h-full">
+                        <div class="absolute top-4 right-4 flex space-x-2">
+                            <a href="${imageUrl}" download="${imageName}" 
+                               class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                                Télécharger
+                            </a>
+                            <button onclick="closeImageModal()" 
+                                    class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                                Fermer
+                            </button>
+                        </div>
+                        <img src="${imageUrl}" alt="${imageName}" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl">
+                        <div class="absolute bottom-4 left-4 bg-black bg-opacity-75 text-white px-3 py-2 rounded-lg text-sm">
+                            ${imageName}
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // Fermer avec Escape
+                modal.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        closeImageModal();
+                    }
+                });
+                
+                // Fermer en cliquant à l'extérieur
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeImageModal();
+                    }
+                });
+            };
+            
+            window.closeImageModal = function() {
+                const modal = document.querySelector('.fixed.inset-0.bg-black.bg-opacity-90.z-50');
+                if (modal) {
+                    modal.remove();
+                }
             };
             
             // Fonctions pour modifier et supprimer les messages

@@ -45,6 +45,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/projects/{project}/chat/{message}', [ProjectChatController::class, 'update'])->name('projects.chat.update');
     Route::delete('/projects/{project}/chat/{message}', [ProjectChatController::class, 'destroy'])->name('projects.chat.destroy');
     Route::post('/projects/{project}/chat/mark-read', [ProjectChatController::class, 'markAsRead'])->name('projects.chat.mark-read');
+    Route::get('/projects/{project}/chat/{message}/download', [ProjectChatController::class, 'downloadFile'])->name('projects.chat.download');
     
     // Route de test pour le chat
     Route::post('/test-chat', function(Request $request) {

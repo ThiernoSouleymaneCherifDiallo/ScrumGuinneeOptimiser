@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ProjectChatController extends Controller
 {
@@ -55,14 +57,56 @@ class ProjectChatController extends Controller
     public function store(Request $request, Project $project)
     {
         $request->validate([
-            'content' => 'required|string|max:2000',
+            'content' => 'nullable|string|max:2000',
+            'file' => 'nullable|file|max:5120', // 5MB max
         ]);
 
-        $message = $project->messages()->create([
+        $messageData = [
             'user_id' => Auth::id(),
-            'content' => $request->content,
-        ]);
+            'content' => $request->content ?? '',
+        ];
 
+        // Gestion de l'upload de fichier
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $fileType = $file->getMimeType();
+            
+            // Vérifier le type de fichier autorisé
+            $allowedTypes = [
+                'image/jpeg',
+                'image/jpg', 
+                'image/png',
+                'image/gif',
+                'application/pdf'
+            ];
+            
+            if (!in_array($fileType, $allowedTypes)) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Type de fichier non autorisé. Seuls les images (JPG, PNG, GIF) et PDF sont acceptés.'
+                    ], 400);
+                }
+                return redirect()->back()->with('error', 'Type de fichier non autorisé');
+            }
+
+            // Générer un nom unique pour le fichier
+            $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+            $filePath = 'chat-files/' . $project->id . '/' . $filename;
+            
+            // Stocker le fichier
+            $file->storeAs('public/' . dirname($filePath), $filename);
+            
+            $messageData = array_merge($messageData, [
+                'filename' => $filename,
+                'original_name' => $file->getClientOriginalName(),
+                'file_path' => $filePath,
+                'file_size' => $file->getSize(),
+                'file_type' => $fileType
+            ]);
+        }
+
+        $message = $project->messages()->create($messageData);
         $message->load('user');
 
         if ($request->ajax()) {
@@ -122,6 +166,11 @@ class ProjectChatController extends Controller
             return redirect()->back()->with('error', 'Vous ne pouvez pas supprimer ce message');
         }
 
+        // Supprimer le fichier associé s'il existe
+        if ($message->has_file) {
+            $message->deleteFile();
+        }
+
         $messageId = $message->id;
         $message->delete();
 
@@ -147,5 +196,34 @@ class ProjectChatController extends Controller
             });
 
         return response()->json(['success' => true]);
+    }
+
+    public function downloadFile(Project $project, ProjectMessage $message)
+    {
+        // Vérifier que l'utilisateur a accès au projet
+        if (!Gate::allows('view', $project)) {
+            abort(403, 'Non autorisé.');
+        }
+
+        // Vérifier que le message appartient au projet
+        if ($message->project_id !== $project->id) {
+            abort(404, 'Message non trouvé.');
+        }
+
+        // Vérifier que le message a un fichier
+        if (!$message->has_file) {
+            abort(404, 'Aucun fichier associé à ce message.');
+        }
+
+        // Vérifier que le fichier existe
+        if (!Storage::exists($message->file_path)) {
+            abort(404, 'Fichier non trouvé.');
+        }
+
+        // Marquer le message comme lu
+        $message->markAsRead();
+
+        // Retourner le fichier pour téléchargement
+        return Storage::download($message->file_path, $message->original_name);
     }
 } 
