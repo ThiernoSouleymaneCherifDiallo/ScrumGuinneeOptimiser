@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 bg-gray-900 min-h-screen">
     <!-- En-tête de la tâche -->
-    <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden mb-6">
+    <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden mb-6 border border-gray-700">
         <div class="p-6">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center space-x-4">
@@ -168,7 +168,7 @@
     </div>
 
     <!-- Commentaires récents -->
-    <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+    <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden border border-gray-700">
         <div class="p-6 border-b border-gray-700">
             <div class="flex items-center justify-between">
                 <h2 class="text-xl font-semibold text-white">Commentaires récents</h2>
