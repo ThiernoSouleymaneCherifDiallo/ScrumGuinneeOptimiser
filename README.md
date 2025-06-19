@@ -64,7 +64,7 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 
 
 schema de suivi pour implementation de sprint
-Exemple de plan d’action
+Exemple de plan d'action
 Migration Sprint et modification Task
 Modèles Sprint et Task (relations)
 SprintController (CRUD)
