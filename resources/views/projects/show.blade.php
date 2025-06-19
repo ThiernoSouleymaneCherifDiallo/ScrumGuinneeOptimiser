@@ -63,6 +63,10 @@
                         <button class="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors">
                             Nouveau sprint
                         </button>
+                        
+                        <a href="{{ route('projects.chat.detached', $project) }}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                            Ouvrir le chat
+                        </a>
                     </div>
                 </div>
             </div>

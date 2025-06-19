@@ -40,5 +40,10 @@ class Project extends Model
     {
         return $this->hasMany(Sprint::class);
     }
+
+    public function messages(): HasMany
+    {
+        return $this->hasMany(ProjectMessage::class)->orderBy('created_at', 'asc');
+    }
 }
 

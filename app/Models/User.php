@@ -109,5 +109,15 @@ class User extends Authenticatable implements MustVerifyEmail
                     ->withTimestamps();
     }
 
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'assignee_id');
+    }
+
+    public function messages(): HasMany
+    {
+        return $this->hasMany(ProjectMessage::class);
+    }
+
 }
 
