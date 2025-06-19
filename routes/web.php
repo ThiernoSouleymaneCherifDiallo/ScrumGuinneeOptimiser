@@ -15,6 +15,8 @@ use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\ProjectChatController;
 use App\Http\Middleware\VerifyCsrfToken;
 use App\Http\Controllers\SprintTaskController;
+use App\Http\Controllers\TaskCommentController;
+use App\Http\Controllers\AllTasksController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -96,7 +98,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Routes pour les tâches
     Route::get('/projects/{project}/tasks/create', [TaskController::class, 'create'])->name('projects.tasks.create');
     Route::post('/projects/{project}/tasks', [TaskController::class, 'store'])->name('projects.tasks.store');
-    Route::get('/projects/{project}/tasks/index', [TaskController::class, 'index'])->name('projects.tasks.index');
+    Route::get('/projects/{project}/tasks/{task}', [TaskController::class, 'show'])->name('projects.tasks.show');
     
     // Route de chat détaché (nouvel onglet)
     Route::get('/projects/{project}/chat-detached', function($project) {
@@ -111,6 +113,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $messages = $project->messages()->with('user')->orderBy('created_at', 'desc')->get();
         return view('projects.chat.detached', compact('project', 'messages'));
     })->name('projects.chat.detached.test')->withoutMiddleware(['auth', 'verified']);
+    
+    // Route pour le backlog
+    Route::get('/projects/{project}/backlog', [BacklogController::class, 'index'])->name('projects.backlog.index');
+    
+    // Routes pour les commentaires de tâches
+    Route::get('/projects/{project}/tasks/{task}/comments', [TaskCommentController::class, 'index'])->name('tasks.comments.index');
+    Route::post('/projects/{project}/tasks/{task}/comments', [TaskCommentController::class, 'store'])->name('tasks.comments.store');
+    Route::put('/projects/{project}/tasks/{task}/comments/{comment}', [TaskCommentController::class, 'update'])->name('tasks.comments.update');
+    Route::delete('/projects/{project}/tasks/{task}/comments/{comment}', [TaskCommentController::class, 'destroy'])->name('tasks.comments.destroy');
 });
 
 // Sprint routes
@@ -126,9 +137,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Route pour le résumé du sprint
     Route::get('/projects/{project}/sprints/{sprint}/summary', [SprintSummaryController::class, 'show'])->name('projects.sprints.summary');
     Route::get('/projects/{project}/sprints/{sprint}/summary/data', [SprintSummaryController::class, 'getData'])->name('projects.sprints.summary.data');
-    
-    // Route pour le backlog
-    Route::get('/projects/{project}/backlog', [BacklogController::class, 'index'])->name('projects.backlog.index');
 });
 
 // Route de test pour vérifier l'authentification
@@ -173,6 +181,23 @@ Route::get('/test-chat-whatsapp', function () {
     $messages = $project->messages()->with('user')->orderBy('created_at', 'asc')->get();
     return view('projects.chat.simple-whatsapp', compact('project', 'messages'));
 })->name('test.chat.whatsapp');
+
+// Route de test pour les commentaires de tâches
+Route::get('/test-task-comments', function () {
+    $project = \App\Models\Project::first();
+    if (!$project) {
+        return 'Aucun projet trouvé';
+    }
+    $task = $project->tasks()->first();
+    if (!$task) {
+        return 'Aucune tâche trouvée';
+    }
+    $comments = $task->comments()->with(['user', 'replies.user'])->get();
+    return view('tasks.comments.index', compact('project', 'task', 'comments'));
+})->name('test.task.comments');
+
+// Route pour toutes les tâches d'un projet
+Route::get('/projects/{project}/tasks', [AllTasksController::class, 'index'])->name('tasks.index');
 
 require __DIR__.'/auth.php';
 

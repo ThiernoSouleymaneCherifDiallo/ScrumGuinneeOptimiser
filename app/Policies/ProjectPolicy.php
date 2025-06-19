@@ -15,7 +15,7 @@ class ProjectPolicy
 
     public function view(User $user, Project $project): bool
     {
-        return $user->id === $project->owner_id || $project->members->contains($user);
+        return $user->id === $project->owner_id || $project->members()->where('user_id', $user->id)->exists();
     }
 
     public function create(User $user): bool

@@ -104,6 +104,15 @@
                                     {{ $task->due_date ? $task->due_date->format('d/m/Y') : 'Non définie' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="{{ route('tasks.comments.index', [$project, $task]) }}"
+                                       class="text-blue-400 hover:text-blue-300 mr-4">
+                                        💬 Commentaires
+                                        @if($task->comments()->count() > 0)
+                                            <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded-full ml-1">
+                                                {{ $task->comments()->count() }}
+                                            </span>
+                                        @endif
+                                    </a>
                                     <a href="{{ route('projects.tasks.edit', [$project, $task]) }}"
                                        class="text-indigo-400 hover:text-indigo-300 mr-4">Modifier</a>
                                     <form action="{{ route('projects.tasks.destroy', [$project, $task]) }}" method="POST"

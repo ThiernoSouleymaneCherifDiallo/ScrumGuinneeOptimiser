@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Task extends Model
 {
@@ -45,5 +46,15 @@ class Task extends Model
     public function reporter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reporter_id');
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(TaskComment::class)->root()->withReplies()->orderBy('created_at', 'asc');
+    }
+
+    public function allComments(): HasMany
+    {
+        return $this->hasMany(TaskComment::class)->withReplies()->orderBy('created_at', 'asc');
     }
 }

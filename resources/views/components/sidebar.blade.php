@@ -3,13 +3,30 @@
     <div class="h-full px-3 pb-4 overflow-y-auto bg-[#23272f]">
         <ul class="space-y-2 font-medium">
             <li>
-                <a href="{{ route('dashboard') }} " class="flex items-center p-2 text-slate-200 rounded-lg hover:bg-[#232b36] group">
-                    <svg class="w-5 h-5 text-slate-400 transition duration-75 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 21">
-                        <path d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z"/>
-                        <path d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z"/>
+                <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z"></path>
                     </svg>
-                    <span class="ms-3">Tableau de bord</span>
-                </a>
+                    <span>Tableau de bord</span>
+                </x-nav-link>
+            </li>
+            <li>
+                @if(isset($project))
+                    <x-nav-link :href="route('tasks.index', $project)" :active="request()->routeIs('tasks.*')">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
+                        <span>Tâches</span>
+                    </x-nav-link>
+                @else
+                    <div class="flex items-center p-2 text-slate-500 rounded-lg cursor-not-allowed">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
+                        <span>Tâches</span>
+                    </div>
+                @endif
             </li>
             <li>
                 <a href="{{ route('projects.index') }}" class="flex items-center p-2 text-slate-200 rounded-lg hover:bg-[#232b36] group">
@@ -65,7 +82,7 @@
                 @endif
             </li>
             <li>
-                <a href="#" class="flex items-center p-2 text-slate-200 rounded-lg hover:bg-[#232b36] group">
+                <a href="{{ route('projects.chat.detached', $project) }}" class="flex items-center p-2 text-slate-200 rounded-lg hover:bg-[#232b36] group">
                     <svg class="flex-shrink-0 w-5 h-5 text-slate-400 transition duration-75 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M7.824 5.016a.5.5 0 0 1 .566 0 7.608 7.608 0 0 1 3.22 3.22.5.5 0 0 1 0 .566 7.608 7.608 0 0 1-3.22 3.22.5.5 0 0 1-.566 0 7.608 7.608 0 0 1-3.22-3.22.5.5 0 0 1 0-.566 7.608 7.608 0 0 1 3.22-3.22Z"/>
                         <path d="M10 0c4.3 0 8 3.033 8 7 0 1.887-.82 3.6-2.12 4.815a1 1 0 0 1-.283.35l-.66.51a1 1 0 0 1-1.2 0l-.66-.51a1 1 0 0 1-.283-.35A6.8 6.8 0 0 1 10 12c-4.3 0-8-3.033-8-7s3.7-7 8-7Z"/>
