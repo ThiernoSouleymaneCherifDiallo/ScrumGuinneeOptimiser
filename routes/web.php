@@ -98,7 +98,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Routes pour les tâches
     Route::get('/projects/{project}/tasks/create', [TaskController::class, 'create'])->name('projects.tasks.create');
     Route::post('/projects/{project}/tasks', [TaskController::class, 'store'])->name('projects.tasks.store');
-    Route::get('/projects/{project}/tasks/index', [TaskController::class, 'index'])->name('projects.tasks.index');
+    Route::get('/projects/{project}/tasks/{task}', [TaskController::class, 'show'])->name('projects.tasks.show');
     
     // Route de chat détaché (nouvel onglet)
     Route::get('/projects/{project}/chat-detached', function($project) {

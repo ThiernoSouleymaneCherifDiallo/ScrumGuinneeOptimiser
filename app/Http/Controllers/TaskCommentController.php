@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Models\TaskComment;
 use App\Models\Project;
+use App\Services\CommentNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -79,6 +80,15 @@ class TaskCommentController extends Controller
 
         $comment = TaskComment::create($commentData);
         $comment->load(['user', 'replies.user']);
+
+        // Envoyer les notifications
+        if ($request->filled('parent_id')) {
+            // C'est une réponse
+            CommentNotificationService::sendReplyNotifications($comment);
+        } else {
+            // C'est un nouveau commentaire
+            CommentNotificationService::sendNotifications($comment);
+        }
 
         if ($request->ajax()) {
             return response()->json([
