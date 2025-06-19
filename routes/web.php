@@ -104,6 +104,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $messages = $project->messages()->with('user')->orderBy('created_at', 'desc')->get();
         return view('projects.chat.detached', compact('project', 'messages'));
     })->name('projects.chat.detached');
+    
+    // Route de test pour le chat détaché sans middlewares
+    Route::get('/projects/{project}/chat-detached-test', function($project) {
+        $project = \App\Models\Project::findOrFail($project);
+        $messages = $project->messages()->with('user')->orderBy('created_at', 'desc')->get();
+        return view('projects.chat.detached', compact('project', 'messages'));
+    })->name('projects.chat.detached.test')->withoutMiddleware(['auth', 'verified']);
 });
 
 // Sprint routes
@@ -123,6 +130,49 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Route pour le backlog
     Route::get('/projects/{project}/backlog', [BacklogController::class, 'index'])->name('projects.backlog.index');
 });
+
+// Route de test pour vérifier l'authentification
+Route::get('/test-auth', function() {
+    if (auth()->check()) {
+        return response()->json([
+            'authenticated' => true,
+            'user' => auth()->user()->name,
+            'email_verified' => !is_null(auth()->user()->email_verified_at),
+            'email' => auth()->user()->email
+        ]);
+    } else {
+        return response()->json([
+            'authenticated' => false,
+            'message' => 'Non connecté'
+        ]);
+    }
+})->name('test.auth');
+
+// Route de test pour le chat sans middlewares
+Route::get('/test-chat-access', function() {
+    $project = \App\Models\Project::first();
+    if (!$project) {
+        return response()->json(['error' => 'Aucun projet trouvé']);
+    }
+    
+    return response()->json([
+        'project' => $project->name,
+        'project_id' => $project->id,
+        'chat_url' => route('projects.chat.detached', $project),
+        'auth_check' => auth()->check(),
+        'user' => auth()->user() ? auth()->user()->name : null
+    ]);
+})->name('test.chat.access');
+
+// Route de test pour le chat simple
+Route::get('/test-chat-whatsapp', function () {
+    $project = \App\Models\Project::first();
+    if (!$project) {
+        return 'Aucun projet trouvé';
+    }
+    $messages = $project->messages()->with('user')->orderBy('created_at', 'asc')->get();
+    return view('projects.chat.simple-whatsapp', compact('project', 'messages'));
+})->name('test.chat.whatsapp');
 
 require __DIR__.'/auth.php';
 

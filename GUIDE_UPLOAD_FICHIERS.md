@@ -25,11 +25,18 @@
 
 #### Affichage des fichiers
 
-**Images :**
-- Affichage direct dans le chat
-- Clic pour ouvrir en modal plein écran
-- Boutons de téléchargement et fermeture dans le modal
-- Effet de survol avec icône de zoom
+**Images (Style WhatsApp) :**
+- ✅ **Affichage direct** dans le chat sans clic
+- ✅ **Taille responsive** : s'adapte à l'écran (max-w-xs à max-w-lg)
+- ✅ **Overlay informatif** : nom et taille au survol
+- ✅ **Bouton téléchargement** flottant au survol
+- ✅ **Modal plein écran** au clic avec :
+  - Boutons d'action (télécharger, fermer)
+  - Informations détaillées
+  - Animations fluides
+  - Navigation clavier (Escape)
+- ✅ **Animations** : hover effects, transitions, slide-in
+- ✅ **Design moderne** : ombres, gradients, backdrop-blur
 
 **PDF :**
 - Carte avec icône PDF
@@ -56,13 +63,39 @@
 ## Utilisation
 
 ### Pour les utilisateurs
-1. Ouvrir le chat d'un projet
-2. Cliquer sur l'icône de trombone
-3. Sélectionner un fichier (image ou PDF, max 5MB)
-4. Optionnel : ajouter un message texte
-5. Cliquer sur "Envoyer"
+1. **Ouvrir le chat** d'un projet : `/projects/{id}/chat-detached`
+2. **Cliquer sur l'icône trombone** (📎) dans la zone de saisie
+3. **Sélectionner une image ou un PDF** (max 5MB)
+4. **Optionnel** : ajouter un message texte
+5. **Envoyer** et voir le fichier s'afficher dans le chat !
 
-### Pour les développeurs
+### Expérience utilisateur optimisée
+- **Images** : Affichage immédiat comme sur WhatsApp
+- **Survol** : Informations et boutons apparaissent
+- **Clic** : Modal plein écran pour voir en grand
+- **Téléchargement** : Un clic pour sauvegarder
+- **Responsive** : S'adapte à tous les écrans
+
+## 🎨 Design et UX
+
+### Animations et transitions
+- **Hover effects** : Élévation et ombres
+- **Slide-in** : Nouvelles images apparaissent en douceur
+- **Modal animations** : Ouverture/fermeture fluide
+- **Loading states** : Placeholders animés
+
+### Responsive design
+- **Mobile** : max-w-xs (petit écran)
+- **Tablet** : max-w-sm (écran moyen)
+- **Desktop** : max-w-md à max-w-lg (grand écran)
+
+### Accessibilité
+- **Clavier** : Escape pour fermer le modal
+- **Clic** : Sur l'image ou l'arrière-plan pour fermer
+- **Focus** : Navigation clavier dans le modal
+- **Alt text** : Descriptions pour les images
+
+## Pour les développeurs
 
 #### Routes disponibles
 ```php
@@ -108,7 +141,18 @@ Les fichiers sont stockés dans `storage/app/public/chat-files/` et peuvent êtr
 
 ## Limitations actuelles
 
-- Pas de compression d'images
+- Pas de compression d'images automatique
 - Pas de prévisualisation des PDF
 - Pas de drag & drop (à implémenter)
-- Pas de gestion des fichiers multiples (un seul par message) 
+- Pas de gestion des fichiers multiples (un seul par message)
+- Pas de galerie d'images (navigation entre images)
+
+## 🚀 Améliorations futures possibles
+
+- **Compression automatique** des images
+- **Galerie d'images** avec navigation
+- **Drag & drop** pour l'upload
+- **Fichiers multiples** par message
+- **Prévisualisation PDF** intégrée
+- **Recherche** dans les fichiers
+- **Partage** de fichiers entre projets 

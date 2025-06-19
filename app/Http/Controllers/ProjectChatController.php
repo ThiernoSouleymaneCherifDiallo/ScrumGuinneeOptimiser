@@ -59,12 +59,22 @@ class ProjectChatController extends Controller
         $request->validate([
             'content' => 'nullable|string|max:2000',
             'file' => 'nullable|file|max:5120', // 5MB max
+            'reply_to_message_id' => 'nullable|exists:project_messages,id',
+            'reply_to_user' => 'nullable|string|max:255',
+            'reply_to_content' => 'nullable|string|max:1000',
         ]);
 
         $messageData = [
             'user_id' => Auth::id(),
             'content' => $request->content ?? '',
         ];
+
+        // Gestion des réponses aux messages
+        if ($request->filled('reply_to_message_id')) {
+            $messageData['reply_to_message_id'] = $request->reply_to_message_id;
+            $messageData['reply_to_user'] = $request->reply_to_user;
+            $messageData['reply_to_content'] = $request->reply_to_content;
+        }
 
         // Gestion de l'upload de fichier
         if ($request->hasFile('file')) {
@@ -108,6 +118,13 @@ class ProjectChatController extends Controller
 
         $message = $project->messages()->create($messageData);
         $message->load('user');
+
+        // Ajouter les informations de réponse pour l'affichage
+        if ($message->reply_to_message_id) {
+            $message->reply_to = true;
+            $message->reply_to_user = $message->reply_to_user;
+            $message->reply_to_content = $message->reply_to_content;
+        }
 
         if ($request->ajax()) {
             return response()->json([

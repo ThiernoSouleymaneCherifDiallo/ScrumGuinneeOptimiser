@@ -89,6 +89,48 @@
                 height: 100vh;
             }
         }
+        
+        /* Styles pour les images WhatsApp-style */
+        .image-message {
+            transition: all 0.3s ease;
+        }
+        
+        .image-message:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .image-overlay {
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+        }
+        
+        /* Animation pour les nouvelles images */
+        .image-enter {
+            animation: imageSlideIn 0.4s ease-out;
+        }
+        
+        @keyframes imageSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        /* Loading placeholder pour les images */
+        .image-loading {
+            background: linear-gradient(90deg, #2a2e33 25%, #3a3f44 50%, #2a2e33 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col">
@@ -167,30 +209,41 @@
                             
                             <!-- Affichage des fichiers -->
                             @if($message->has_file)
-                                <div class="mt-3 p-3 bg-gray-800 rounded-lg border border-gray-700">
-                                    @if($message->isImage())
-                                        <div class="space-y-2">
-                                            <div class="flex items-center space-x-2 text-sm text-jira-gray">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                                </svg>
-                                                <span>{{ $message->original_name }}</span>
-                                                <span class="text-xs">({{ $message->formatted_file_size }})</span>
-                                            </div>
-                                            <div class="relative group">
-                                                <img src="{{ $message->file_url }}" alt="{{ $message->original_name }}" 
-                                                     class="max-w-full max-h-64 rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                                                     onclick="openImageModal('{{ $message->file_url }}', '{{ $message->original_name }}')">
-                                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-lg flex items-center justify-center">
-                                                    <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
-                                                        </svg>
+                                @if($message->isImage())
+                                    <!-- Affichage direct des images comme WhatsApp -->
+                                    <div class="mt-3 image-message">
+                                        <div class="relative inline-block max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
+                                            <img src="{{ $message->file_url }}" 
+                                                 alt="{{ $message->original_name }}" 
+                                                 class="rounded-lg shadow-lg cursor-pointer hover:opacity-90 transition-all duration-200 max-w-full h-auto"
+                                                 onclick="openImageModal('{{ $message->file_url }}', '{{ $message->original_name }}')"
+                                                 loading="lazy">
+                                            
+                                            <!-- Overlay avec informations au survol -->
+                                            <div class="absolute bottom-0 left-0 right-0 image-overlay p-3 rounded-b-lg opacity-0 hover:opacity-100 transition-opacity">
+                                                <div class="text-white text-xs">
+                                                    <div class="flex items-center justify-between">
+                                                        <span class="truncate">{{ $message->original_name }}</span>
+                                                        <span>{{ $message->formatted_file_size }}</span>
                                                     </div>
                                                 </div>
                                             </div>
+                                            
+                                            <!-- Bouton de téléchargement flottant -->
+                                            <div class="absolute top-2 right-2 opacity-0 hover:opacity-100 transition-opacity">
+                                                <a href="{{ route('projects.chat.download', ['project' => $project, 'message' => $message]) }}" 
+                                                   class="bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+                                                   title="Télécharger">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                    </svg>
+                                                </a>
+                                            </div>
                                         </div>
-                                    @elseif($message->isPdf())
+                                    </div>
+                                @elseif($message->isPdf())
+                                    <!-- Affichage des PDF (inchangé) -->
+                                    <div class="mt-3 p-3 bg-gray-800 rounded-lg border border-gray-700">
                                         <div class="flex items-center space-x-3 p-3 bg-gray-900 rounded-lg border border-gray-600 hover:border-gray-500 transition-colors">
                                             <div class="flex-shrink-0">
                                                 <svg class="w-10 h-10 text-red-500" fill="currentColor" viewBox="0 0 24 24">
@@ -218,8 +271,8 @@
                                                 </a>
                                             </div>
                                         </div>
-                                    @endif
-                                </div>
+                                    </div>
+                                @endif
                             @endif
                             
                             <!-- Actions du message -->
@@ -232,7 +285,7 @@
                                         🗑️ Supprimer
                                     </button>
                                 @else
-                                    <button onclick="replyToMessage({{ $message->id }})" class="text-xs text-jira-gray hover:text-white transition-colors bg-gray-800 px-2 py-1 rounded">
+                                    <button onclick="replyToMessage({{ $message->id }}, '{{ $message->user->name }}', '{{ $message->content }}')" class="text-xs text-jira-gray hover:text-white transition-colors bg-gray-800 px-2 py-1 rounded">
                                         💬 Répondre
                                     </button>
                                 @endif
@@ -264,6 +317,24 @@
 
     <!-- Zone de saisie améliorée -->
     <div class="bg-gradient-to-r from-jira-card to-gray-800 border-t border-jira p-4 shadow-lg">
+        <!-- Zone de citation (cachée par défaut) -->
+        <div id="reply-preview" class="hidden mb-3 p-3 bg-gray-800 rounded-lg border-l-4 border-blue-500">
+            <div class="flex items-center justify-between">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center space-x-2 mb-1">
+                        <span class="text-xs text-blue-400 font-medium">Répondre à</span>
+                        <span class="text-xs text-white font-semibold" id="reply-user-name"></span>
+                    </div>
+                    <p class="text-xs text-gray-300 truncate" id="reply-content"></p>
+                </div>
+                <button onclick="cancelReply()" class="text-gray-400 hover:text-white transition-colors ml-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
         <form id="chat-form" class="flex items-end space-x-3" enctype="multipart/form-data">
             @csrf
             <div class="flex-1">
@@ -385,9 +456,16 @@
                     formData.append('content', message);
                     formData.append('_token', token);
                     
+                    // Ajouter les informations de réponse si on répond à un message
+                    if (window.replyingTo) {
+                        formData.append('reply_to_message_id', window.replyingTo.messageId);
+                        formData.append('reply_to_user', window.replyingTo.userName);
+                        formData.append('reply_to_content', window.replyingTo.content);
+                    }
+                    
                     // Ajouter le fichier s'il y en a un
                     const fileInput = document.getElementById('file-input');
-                    if (fileInput.files[0]) {
+                    if (fileInput && fileInput.files[0]) {
                         formData.append('file', fileInput.files[0]);
                     }
                     
@@ -409,6 +487,9 @@
                     })
                     .then(function(response) {
                         console.log('Réponse reçue:', response);
+                        if (!response.ok) {
+                            throw new Error('Erreur HTTP: ' + response.status);
+                        }
                         return response.text();
                     })
                     .then(function(text) {
@@ -435,26 +516,32 @@
                                 if (data.message.has_file) {
                                     if (data.message.is_image) {
                                         fileHtml = `
-                                            <div class="mt-3 p-3 bg-gray-800 rounded-lg border border-gray-700">
-                                                <div class="space-y-2">
-                                                    <div class="flex items-center space-x-2 text-sm text-jira-gray">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                                        </svg>
-                                                        <span>${data.message.original_name}</span>
-                                                        <span class="text-xs">(${data.message.formatted_file_size})</span>
-                                                    </div>
-                                                    <div class="relative group">
-                                                        <img src="${data.message.file_url}" alt="${data.message.original_name}" 
-                                                             class="max-w-full max-h-64 rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                                                             onclick="openImageModal('${data.message.file_url}', '${data.message.original_name}')">
-                                                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-lg flex items-center justify-center">
-                                                            <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
-                                                                </svg>
+                                            <div class="mt-3 image-message image-enter">
+                                                <div class="relative inline-block max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
+                                                    <img src="${data.message.file_url}" 
+                                                         alt="${data.message.original_name}" 
+                                                         class="rounded-lg shadow-lg cursor-pointer hover:opacity-90 transition-all duration-200 max-w-full h-auto"
+                                                         onclick="openImageModal('${data.message.file_url}', '${data.message.original_name}')">
+                                                    
+                                                    <!-- Overlay avec informations au survol -->
+                                                    <div class="absolute bottom-0 left-0 right-0 image-overlay p-3 rounded-b-lg opacity-0 hover:opacity-100 transition-opacity">
+                                                        <div class="text-white text-xs">
+                                                            <div class="flex items-center justify-between">
+                                                                <span class="truncate">${data.message.original_name}</span>
+                                                                <span>${data.message.formatted_file_size}</span>
                                                             </div>
                                                         </div>
+                                                    </div>
+                                                    
+                                                    <!-- Bouton de téléchargement flottant -->
+                                                    <div class="absolute top-2 right-2 opacity-0 hover:opacity-100 transition-opacity">
+                                                        <a href="/projects/{{ $project->id }}/chat/${data.message.id}/download" 
+                                                           class="bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+                                                           title="Télécharger">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                            </svg>
+                                                        </a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -502,6 +589,18 @@
                                                     <div class="flex items-center justify-end mb-3">
                                                         <span class="text-xs text-jira-gray bg-gray-800 px-2 py-1 rounded-full">À l'instant</span>
                                                     </div>
+                                                    
+                                                    ${data.message.reply_to ? `
+                                                        <!-- Citation du message auquel on répond -->
+                                                        <div class="mb-3 p-2 bg-gray-800 rounded-lg border-l-4 border-blue-500">
+                                                            <div class="flex items-center space-x-2 mb-1">
+                                                                <span class="text-xs text-blue-400 font-medium">Répondre à</span>
+                                                                <span class="text-xs text-white font-semibold">${data.message.reply_to_user}</span>
+                                                            </span>
+                                                            <p class="text-xs text-gray-300">${data.message.reply_to_content}</p>
+                                                        </div>
+                                                    ` : ''}
+                                                    
                                                     <div class="text-white leading-relaxed text-sm">
                                                         ${data.message.content}
                                                     </div>
@@ -635,25 +734,68 @@
             
             window.openImageModal = function(imageUrl, imageName) {
                 const modal = document.createElement('div');
-                modal.className = 'fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4';
+                modal.className = 'fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center p-4 backdrop-blur-sm';
                 modal.innerHTML = `
-                    <div class="relative max-w-4xl max-h-full">
-                        <div class="absolute top-4 right-4 flex space-x-2">
+                    <div class="relative max-w-5xl max-h-full w-full h-full flex items-center justify-center">
+                        <!-- Boutons d'action -->
+                        <div class="absolute top-4 right-4 flex space-x-2 z-10">
                             <a href="${imageUrl}" download="${imageName}" 
-                               class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
                                 Télécharger
                             </a>
                             <button onclick="closeImageModal()" 
-                                    class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                                    class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
                                 Fermer
                             </button>
                         </div>
-                        <img src="${imageUrl}" alt="${imageName}" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl">
-                        <div class="absolute bottom-4 left-4 bg-black bg-opacity-75 text-white px-3 py-2 rounded-lg text-sm">
-                            ${imageName}
+                        
+                        <!-- Image principale -->
+                        <div class="relative w-full h-full flex items-center justify-center">
+                            <img src="${imageUrl}" alt="${imageName}" 
+                                 class="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-fadeIn"
+                                 style="animation: fadeIn 0.3s ease-out;">
                         </div>
+                        
+                        <!-- Informations en bas -->
+                        <div class="absolute bottom-4 left-4 right-4 bg-black bg-opacity-75 backdrop-blur-sm text-white px-4 py-3 rounded-lg text-sm">
+                            <div class="flex items-center justify-between">
+                                <span class="font-medium truncate">${imageName}</span>
+                                <span class="text-gray-300">Cliquez pour fermer</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Boutons de navigation (pour futures fonctionnalités) -->
+                        <button class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-3 rounded-full transition-all duration-200 opacity-0 hover:opacity-100">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+                        <button class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-3 rounded-full transition-all duration-200 opacity-0 hover:opacity-100">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
                     </div>
                 `;
+                
+                // Ajouter les styles d'animation
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes fadeIn {
+                        from { opacity: 0; transform: scale(0.9); }
+                        to { opacity: 1; transform: scale(1); }
+                    }
+                    .animate-fadeIn {
+                        animation: fadeIn 0.3s ease-out;
+                    }
+                `;
+                document.head.appendChild(style);
                 
                 document.body.appendChild(modal);
                 
@@ -664,16 +806,23 @@
                     }
                 });
                 
-                // Fermer en cliquant à l'extérieur
+                // Fermer en cliquant sur l'image ou l'arrière-plan
                 modal.addEventListener('click', function(e) {
-                    if (e.target === modal) {
+                    if (e.target === modal || e.target.tagName === 'IMG') {
                         closeImageModal();
                     }
+                });
+                
+                // Empêcher la fermeture en cliquant sur les boutons
+                modal.querySelectorAll('button, a').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                    });
                 });
             };
             
             window.closeImageModal = function() {
-                const modal = document.querySelector('.fixed.inset-0.bg-black.bg-opacity-90.z-50');
+                const modal = document.querySelector('.fixed.inset-0.bg-black.bg-opacity-95.z-50');
                 if (modal) {
                     modal.remove();
                 }
@@ -808,18 +957,6 @@
                 });
             };
             
-            window.replyToMessage = function(messageId) {
-                const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
-                const userName = messageElement.querySelector('.font-semibold.text-white')?.textContent || 'ce message';
-                
-                // Ajouter le nom de l'utilisateur dans le textarea
-                input.value = `@${userName} `;
-                input.focus();
-                input.setSelectionRange(input.value.length, input.value.length);
-                
-                showNotification(`Réponse à ${userName}`, 'info');
-            };
-            
             window.closeEditModal = function() {
                 const modal = document.querySelector('.fixed.inset-0.bg-black.bg-opacity-50.z-50');
                 if (modal) {
@@ -851,4 +988,4 @@
         });
     </script>
 </body>
-</html> 
+</html>

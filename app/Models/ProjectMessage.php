@@ -22,7 +22,10 @@ class ProjectMessage extends Model
         'original_name',
         'file_path',
         'file_size',
-        'file_type'
+        'file_type',
+        'reply_to_message_id',
+        'reply_to_user',
+        'reply_to_content'
     ];
 
     protected $casts = [
@@ -52,6 +55,16 @@ class ProjectMessage extends Model
     public function reads(): HasMany
     {
         return $this->hasMany(ProjectMessageRead::class, 'message_id');
+    }
+
+    public function replyTo(): BelongsTo
+    {
+        return $this->belongsTo(ProjectMessage::class, 'reply_to_message_id');
+    }
+
+    public function replies(): HasMany
+    {
+        return $this->hasMany(ProjectMessage::class, 'reply_to_message_id');
     }
 
     public function getFormattedTimeAttribute(): string
