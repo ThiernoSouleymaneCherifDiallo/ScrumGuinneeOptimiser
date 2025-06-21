@@ -55,16 +55,25 @@
                 </a>
             </li>
             <li>
-                <a href="#" class="flex items-center p-2 text-slate-200 rounded-lg hover:bg-[#232b36] group">
-                    <svg class="flex-shrink-0 w-5 h-5 text-slate-400 transition duration-75 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
-                        <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z"/>
-                    </svg>
-                    <span class="flex-1 ms-3 whitespace-nowrap">Équipe</span>
-                </a>
+                @if(isset($project))
+                    <a href="{{ route('projects.team.index', $project) }}" class="flex items-center p-2 text-slate-200 rounded-lg hover:bg-[#232b36] group">
+                        <svg class="flex-shrink-0 w-5 h-5 text-slate-400 transition duration-75 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
+                            <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z"/>
+                        </svg>
+                        <span class="flex-1 ms-3 whitespace-nowrap">Équipe</span>
+                    </a>
+                @else
+                    <div class="flex items-center p-2 text-slate-500 rounded-lg cursor-not-allowed">
+                        <svg class="flex-shrink-0 w-5 h-5 text-slate-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
+                            <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z"/>
+                        </svg>
+                        <span class="flex-1 ms-3 whitespace-nowrap">Équipe</span>
+                    </div>
+                @endif
             </li>
             <li>
                 @if(isset($project) && isset($sprint))
-                    <a href="{{ route('projects.sprints.summary', ['project' => $project, 'sprint' => $sprint]) }}" class="flex items-center p-2 text-slate-200 rounded-lg hover:bg-[#232b36] group">
+                    <a href="{{ route('sprints.summary', ['project' => $project, 'sprint' => $sprint]) }}" class="flex items-center p-2 text-slate-200 rounded-lg hover:bg-[#232b36] group">
                         <svg class="flex-shrink-0 w-5 h-5 text-slate-400 transition duration-75 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"/>
                             <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"/>
@@ -91,12 +100,12 @@
                 </a>
             </li>
             <li>
-                <a href="#" class="flex items-center p-2 text-slate-200 rounded-lg hover:bg-[#232b36] group">
+                {{-- <a href="#" class="flex items-center p-2 text-slate-200 rounded-lg hover:bg-[#232b36] group">
                     <svg class="flex-shrink-0 w-5 h-5 text-slate-400 transition duration-75 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
                     </svg>
                     <span class="flex-1 ms-3 whitespace-nowrap">Paramètres</span>
-                </a>
+                </a> --}}
             </li>
         </ul>
     </div>
