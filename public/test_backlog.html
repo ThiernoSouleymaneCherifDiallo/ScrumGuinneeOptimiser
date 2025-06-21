@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test API Backlog</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+</head>
+<body>
+    <h1>Test API Backlog</h1>
+    
+    <div>
+        <h2>Test de déplacement de tâche</h2>
+        <button onclick="testMoveTask()">Tester le déplacement</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function testMoveTask() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Test en cours...';
+            
+            // Récupérer le token CSRF
+            const token = document.querySelector('meta[name="csrf-token"]').content;
+            console.log('Token CSRF:', token);
+            
+            fetch('/api/tasks/1/move', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ sprint_id: 1 })
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                resultDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.innerHTML = 'Erreur: ' + error.message;
+            });
+        }
+    </script>
+</body>
+</html> 

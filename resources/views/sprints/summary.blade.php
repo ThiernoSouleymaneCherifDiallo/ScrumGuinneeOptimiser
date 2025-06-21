@@ -102,13 +102,27 @@
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-white">Burndown Chart</h3>
                     <div class="flex space-x-2">
+                        <button onclick="debugChart()" class="text-xs bg-gray-600 hover:bg-gray-700 px-2 py-1 rounded transition-colors" title="Debug">
+                            🐛
+                        </button>
                         <button onclick="updateChart()" class="text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded transition-colors">
                             Actualiser
                         </button>
                     </div>
                 </div>
-                <div class="h-64 flex items-center justify-center">
-                    <canvas id="burndownChart" width="400" height="200"></canvas>
+                <div class="h-64 w-full flex items-center justify-center bg-jira-dark rounded-lg border border-jira">
+                    <canvas id="burndownChart" width="600" height="250" style="max-width: 100%; max-height: 100%;"></canvas>
+                </div>
+                <div class="mt-3 text-xs text-jira-gray text-center">
+                    <span class="inline-flex items-center space-x-2">
+                        <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                        <span>Burndown idéal</span>
+                    </span>
+                    <span class="mx-4">•</span>
+                    <span class="inline-flex items-center space-x-2">
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        <span>Burndown réel</span>
+                    </span>
                 </div>
             </div>
 
@@ -426,88 +440,172 @@
 @endsection
 
 @section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
-let burndownChart;
+let burndownChart = null;
 let refreshInterval;
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM chargé, initialisation du graphique...');
     initializeChart();
     startAutoRefresh();
     addEventListeners();
 });
 
 function initializeChart() {
-    const ctx = document.getElementById('burndownChart').getContext('2d');
-    const burndownData = @json($burndownData);
+    const canvas = document.getElementById('burndownChart');
+    if (!canvas) {
+        console.error('Canvas burndownChart non trouvé');
+        return;
+    }
     
-    burndownChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: burndownData.labels,
-            datasets: [
-                {
-                    label: 'Burndown idéal',
-                    data: burndownData.ideal,
-                    borderColor: '#3B82F6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    borderWidth: 2,
-                    fill: false,
-                    tension: 0.1
-                },
-                {
-                    label: 'Burndown réel',
-                    data: burndownData.actual,
-                    borderColor: '#10B981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                    borderWidth: 2,
-                    fill: false,
-                    tension: 0.1
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    labels: {
-                        color: '#9FADBC'
-                    }
-                },
-                tooltip: {
-                    backgroundColor: '#22272B',
-                    titleColor: '#FFFFFF',
-                    bodyColor: '#9FADBC',
-                    borderColor: '#3C3F42',
-                    borderWidth: 1
-                }
-            },
-            scales: {
-                x: {
-                    ticks: {
-                        color: '#9FADBC'
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+        console.error('Impossible d\'obtenir le contexte 2D');
+        return;
+    }
+    
+    const burndownData = @json($burndownData);
+    console.log('Données burndown:', burndownData);
+    
+    // Vérifier si les données sont valides
+    if (!burndownData || !burndownData.labels || burndownData.labels.length === 0) {
+        console.warn('Données burndown invalides ou vides');
+        showNoDataMessage();
+        return;
+    }
+    
+    // Détruire le graphique existant s'il y en a un
+    if (burndownChart) {
+        burndownChart.destroy();
+    }
+    
+    try {
+        burndownChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: burndownData.labels,
+                datasets: [
+                    {
+                        label: 'Burndown idéal',
+                        data: burndownData.ideal,
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
                     },
-                    grid: {
-                        color: '#3C3F42'
+                    {
+                        label: 'Burndown réel',
+                        data: burndownData.actual,
+                        borderColor: '#10B981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#9FADBC',
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#22272B',
+                        titleColor: '#FFFFFF',
+                        bodyColor: '#9FADBC',
+                        borderColor: '#3C3F42',
+                        borderWidth: 1,
+                        cornerRadius: 6
                     }
                 },
-                y: {
-                    ticks: {
-                        color: '#9FADBC'
+                scales: {
+                    x: {
+                        ticks: {
+                            color: '#9FADBC',
+                            font: {
+                                size: 11
+                            }
+                        },
+                        grid: {
+                            color: '#3C3F42',
+                            drawBorder: false
+                        }
                     },
-                    grid: {
-                        color: '#3C3F42'
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#9FADBC',
+                            font: {
+                                size: 11
+                            }
+                        },
+                        grid: {
+                            color: '#3C3F42',
+                            drawBorder: false
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                elements: {
+                    point: {
+                        hoverBackgroundColor: '#FFFFFF'
                     }
                 }
-            },
-            interaction: {
-                intersect: false,
-                mode: 'index'
             }
-        }
-    });
+        });
+        
+        console.log('Graphique burndown initialisé avec succès');
+        
+    } catch (error) {
+        console.error('Erreur lors de l\'initialisation du graphique:', error);
+        showErrorMessage('Erreur lors du chargement du graphique');
+    }
+}
+
+function showNoDataMessage() {
+    const canvas = document.getElementById('burndownChart');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Dessiner un message
+        ctx.fillStyle = '#9FADBC';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Aucune donnée disponible', canvas.width / 2, canvas.height / 2 - 10);
+        ctx.font = '12px Arial';
+        ctx.fillText('Ajoutez des tâches avec des story points', canvas.width / 2, canvas.height / 2 + 10);
+    }
+}
+
+function showErrorMessage(message) {
+    const canvas = document.getElementById('burndownChart');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = '#EF4444';
+        ctx.font = '14px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(message, canvas.width / 2, canvas.height / 2);
+    }
 }
 
 function startAutoRefresh() {
@@ -577,10 +675,26 @@ function updateMetrics(data) {
 }
 
 function updateChart(burndownData) {
-    burndownChart.data.labels = burndownData.labels;
-    burndownChart.data.datasets[0].data = burndownData.ideal;
-    burndownChart.data.datasets[1].data = burndownData.actual;
-    burndownChart.update('active');
+    if (!burndownChart) {
+        console.warn('Graphique non initialisé, réinitialisation...');
+        initializeChart();
+        return;
+    }
+    
+    if (!burndownData || !burndownData.labels || burndownData.labels.length === 0) {
+        console.warn('Données burndown invalides pour la mise à jour');
+        return;
+    }
+    
+    try {
+        burndownChart.data.labels = burndownData.labels;
+        burndownChart.data.datasets[0].data = burndownData.ideal;
+        burndownChart.data.datasets[1].data = burndownData.actual;
+        burndownChart.update('active');
+        console.log('Graphique mis à jour avec succès');
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du graphique:', error);
+    }
 }
 
 function updateTaskLists(data) {
@@ -687,6 +801,18 @@ function scheduleRetrospective() {
 function updateChart() {
     refreshData();
 }
+
+// Fonction de debug pour vérifier l'état du graphique
+function debugChart() {
+    console.log('État du graphique:', {
+        chart: burndownChart,
+        canvas: document.getElementById('burndownChart'),
+        data: @json($burndownData)
+    });
+}
+
+// Exposer la fonction de debug globalement
+window.debugChart = debugChart;
 </script>
 @endsection
 

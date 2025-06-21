@@ -192,6 +192,16 @@ class SprintSummaryController extends Controller
         $totalDays = $startDate->diffInDays($endDate) + 1;
         $now = Carbon::now();
         
+        // Si pas de story points, utiliser le nombre de tâches
+        if ($totalStoryPoints === 0) {
+            $totalStoryPoints = $sprint->tasks->count();
+        }
+        
+        // Si toujours pas de données, créer des données d'exemple
+        if ($totalStoryPoints === 0) {
+            $totalStoryPoints = 10; // Valeur par défaut pour l'affichage
+        }
+        
         $idealBurndown = [];
         $actualBurndown = [];
         $labels = [];
@@ -201,7 +211,7 @@ class SprintSummaryController extends Controller
             $labels[] = $currentDate->format('d/m');
             
             // Burndown idéal
-            $idealBurndown[] = $totalStoryPoints - (($totalStoryPoints / $totalDays) * $i);
+            $idealBurndown[] = max(0, $totalStoryPoints - (($totalStoryPoints / $totalDays) * $i));
             
             // Burndown réel
             if ($currentDate <= $now) {
@@ -209,16 +219,34 @@ class SprintSummaryController extends Controller
                     ->where('status', 'done')
                     ->where('updated_at', '<=', $currentDate->endOfDay())
                     ->sum('story_points');
-                $actualBurndown[] = $totalStoryPoints - $completedAtDate;
+                
+                // Si pas de story points, compter les tâches
+                if ($completedAtDate === 0) {
+                    $completedAtDate = $sprint->tasks()
+                        ->where('status', 'done')
+                        ->where('updated_at', '<=', $currentDate->endOfDay())
+                        ->count();
+                }
+                
+                $actualBurndown[] = max(0, $totalStoryPoints - $completedAtDate);
             } else {
                 $actualBurndown[] = null;
             }
         }
         
+        // S'assurer qu'il y a au moins 2 points de données
+        if (count($labels) < 2) {
+            $labels = ['Début', 'Fin'];
+            $idealBurndown = [$totalStoryPoints, 0];
+            $actualBurndown = [$totalStoryPoints, 0];
+        }
+        
         return [
             'labels' => $labels,
             'ideal' => $idealBurndown,
-            'actual' => $actualBurndown
+            'actual' => $actualBurndown,
+            'totalStoryPoints' => $totalStoryPoints,
+            'totalDays' => $totalDays
         ];
     }
 

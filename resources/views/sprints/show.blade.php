@@ -93,7 +93,7 @@
                         
                         <!-- Boutons d'action -->
                         <div class="mt-6 lg:mt-0 flex flex-wrap gap-3">
-                            <a href="{{ route('projects.sprints.summary', [$project, $sprint]) }}"
+                            <a href="{{ route('sprints.summary', [$project, $sprint]) }}"
                                class="inline-flex items-center px-4 py-2 bg-purple-600 border border-purple-500 rounded-lg text-sm font-medium text-white hover:bg-purple-700 hover:border-purple-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-900 shadow-lg shadow-purple-500/25">
                                 <svg class="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
@@ -423,15 +423,15 @@
 <div id="taskModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <!-- Fond gris -->
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
 
         <!-- Contenu du modal -->
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         
-        <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+        <div class="inline-block align-bottom bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6 border border-gray-700">
             <div>
                 <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                    <h3 class="text-lg leading-6 font-medium text-white" id="modal-title">
                         Nouvelle tâche
                     </h3>
                     <div class="mt-2">
@@ -439,21 +439,23 @@
                             @csrf
                             <div class="space-y-4">
                                 <div>
-                                    <label for="title" class="block text-sm font-medium text-gray-700">Titre <span class="text-red-500">*</span></label>
+                                    <label for="title" class="block text-sm font-medium text-gray-300">Titre <span class="text-red-400">*</span></label>
                                     <input type="text" name="title" id="title" required
-                                           class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                           class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-600 bg-gray-700 text-white rounded-md"
+                                           placeholder="Titre de la tâche">
                                 </div>
                                 
                                 <div>
-                                    <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                                    <label for="description" class="block text-sm font-medium text-gray-300">Description</label>
                                     <textarea name="description" id="description" rows="3"
-                                              class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"></textarea>
+                                              class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-600 bg-gray-700 text-white rounded-md"
+                                              placeholder="Description de la tâche"></textarea>
                                 </div>
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label for="status" class="block text-sm font-medium text-gray-700">Statut</label>
-                                        <select id="status" name="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                        <label for="status" class="block text-sm font-medium text-gray-300">Statut</label>
+                                        <select id="status" name="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 bg-gray-700 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
                                             <option value="todo">À faire</option>
                                             <option value="in_progress">En cours</option>
                                             <option value="review">En revue</option>
@@ -462,8 +464,8 @@
                                     </div>
                                     
                                     <div>
-                                        <label for="priority" class="block text-sm font-medium text-gray-700">Priorité</label>
-                                        <select id="priority" name="priority" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                        <label for="priority" class="block text-sm font-medium text-gray-300">Priorité</label>
+                                        <select id="priority" name="priority" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 bg-gray-700 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
                                             <option value="low">Basse</option>
                                             <option value="medium" selected>Moyenne</option>
                                             <option value="high">Haute</option>
@@ -472,9 +474,9 @@
                                 </div>
                                 
                                 <div>
-                                    <label for="story_points" class="block text-sm font-medium text-gray-700">Points d'histoire</label>
+                                    <label for="story_points" class="block text-sm font-medium text-gray-300">Points d'histoire</label>
                                     <input type="number" name="story_points" id="story_points" min="0" value="1"
-                                           class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                           class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-600 bg-gray-700 text-white rounded-md">
                                 </div>
                             </div>
                             
@@ -484,7 +486,7 @@
                                     Créer la tâche
                                 </button>
                                 <button type="button" onclick="closeTaskModal()"
-                                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 sm:text-sm">
+                                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-600 shadow-sm px-4 py-2 bg-gray-700 text-base font-medium text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 sm:text-sm">
                                     Annuler
                                 </button>
                             </div>

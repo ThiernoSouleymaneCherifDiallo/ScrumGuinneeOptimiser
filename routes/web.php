@@ -13,6 +13,7 @@ use App\Http\Controllers\BacklogController;
 use App\Http\Controllers\SprintSummaryController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\ProjectChatController;
+use App\Http\Controllers\ProjectTeamController;
 use App\Http\Middleware\VerifyCsrfToken;
 use App\Http\Controllers\SprintTaskController;
 use App\Http\Controllers\TaskCommentController;
@@ -40,6 +41,13 @@ Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->grou
 // Project routes
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('projects', ProjectController::class);
+    
+    // Project team routes
+    Route::get('/projects/{project}/team', [ProjectTeamController::class, 'index'])->name('projects.team.index');
+    Route::get('/projects/{project}/team/search', [ProjectTeamController::class, 'search'])->name('projects.team.search');
+    Route::post('/projects/{project}/team/add-member', [ProjectTeamController::class, 'addMember'])->name('projects.team.add-member');
+    Route::patch('/projects/{project}/team/update-role/{user}', [ProjectTeamController::class, 'updateMemberRole'])->name('projects.team.update-role');
+    Route::delete('/projects/{project}/team/remove-member/{user}', [ProjectTeamController::class, 'removeMember'])->name('projects.team.remove-member');
     
     // Project chat routes
     Route::get('/projects/{project}/chat', [ProjectChatController::class, 'index'])->name('projects.chat.index');
@@ -134,9 +142,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/projects/{project}/sprints/{sprint}/tasks/{task}/status', [SprintTaskController::class, 'updateStatus'])->name('sprints.tasks.update-status');
     Route::put('/projects/{project}/sprints/{sprint}/tasks/{task}/assign', [SprintTaskController::class, 'assignTask'])->name('sprints.tasks.assign');
     
-    // Route pour le résumé du sprint
-    Route::get('/projects/{project}/sprints/{sprint}/summary', [SprintSummaryController::class, 'show'])->name('projects.sprints.summary');
-    Route::get('/projects/{project}/sprints/{sprint}/summary/data', [SprintSummaryController::class, 'getData'])->name('projects.sprints.summary.data');
+    // Routes pour les résumés de sprint
+    Route::get('/projects/{project}/sprints/{sprint}/summary', [SprintSummaryController::class, 'show'])->name('sprints.summary');
+    Route::get('/projects/{project}/sprints/{sprint}/summary/data', [SprintSummaryController::class, 'getData'])->name('sprints.summary.data');
 });
 
 // Route de test pour vérifier l'authentification
@@ -198,6 +206,11 @@ Route::get('/test-task-comments', function () {
 
 // Route pour toutes les tâches d'un projet
 Route::get('/projects/{project}/tasks', [AllTasksController::class, 'index'])->name('tasks.index');
+
+// Route de test pour le burndown chart
+Route::get('/test-burndown', function () {
+    return view('test-burndown');
+})->name('test.burndown');
 
 require __DIR__.'/auth.php';
 
