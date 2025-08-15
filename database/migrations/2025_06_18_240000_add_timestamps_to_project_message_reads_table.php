@@ -8,15 +8,21 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('project_message_reads', function (Blueprint $table) {
-            $table->timestamps();
-        });
+        // Vérifier si les colonnes timestamps existent déjà
+        if (!Schema::hasColumn('project_message_reads', 'created_at')) {
+            Schema::table('project_message_reads', function (Blueprint $table) {
+                $table->timestamps();
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('project_message_reads', function (Blueprint $table) {
-            $table->dropTimestamps();
-        });
+        // Vérifier si les colonnes existent avant de les supprimer
+        if (Schema::hasColumn('project_message_reads', 'created_at')) {
+            Schema::table('project_message_reads', function (Blueprint $table) {
+                $table->dropTimestamps();
+            });
+        }
     }
 }; 
